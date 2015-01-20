@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Road Checker</string>
+    <string name="title_section1">Hlavní</string>
+    <string name="title_section2">Mapa</string>
+    <string name="title_section3">Ostatní</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+</resources>
