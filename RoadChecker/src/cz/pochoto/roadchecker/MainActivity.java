@@ -1,24 +1,23 @@
 package cz.pochoto.roadchecker;
 
+import java.util.List;
 import java.util.Locale;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-import android.app.Activity;
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.support.v13.app.FragmentPagerAdapter;
+import android.content.Context;
+import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.Gravity;
-import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +26,22 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class MainActivity extends Activity implements ActionBar.TabListener {
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import cz.pochoto.roadchecker.handlers.MapHandler;
+
+public class MainActivity extends Activity implements ActionBar.TabListener, ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -38,29 +52,44 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 	 */
 	SectionsPagerAdapter mSectionsPagerAdapter;	
 	
-	public static FragmentManager fragmentManager;
+	public static MapHandler mapHandler;	
+	public static FragmentManager fragmentManager;	
+	public static SensorManager sensorManager;
+	
+	public static TextView sectionLabel;
 
 	/**
 	 * The {@link ViewPager} that will host the section contents.
 	 */
-	ViewPager mViewPager;
+	ViewPager mViewPager;	
+
+	private static GoogleApiClient mGoogleApiClient;
+	private static LocationRequest mLocationRequest;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		buildGoogleApiClient();
+		
+		mapHandler = new MapHandler();
+		sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+		fragmentManager = getFragmentManager();
+		
+		
+		
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-		// Create the adapter that will return a fragment for each of the three
-		// primary sections of the activity.
-		fragmentManager = getFragmentManager();
-		mSectionsPagerAdapter = new SectionsPagerAdapter(fragmentManager);
+		
+				
+		sensorManager(sensorManager.getSensorList(Sensor.TYPE_ALL));
+		
+		mSectionsPagerAdapter = new SectionsPagerAdapter(fragmentManager);		
 
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
+		mViewPager.setBackgroundColor(Color.GRAY);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
 
 		// When swiping between different sections, select the corresponding
@@ -84,6 +113,68 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 					.setText(mSectionsPagerAdapter.getPageTitle(i))
 					.setTabListener(this));
 		}
+	}
+	
+	private void sensorManager(List<Sensor> sensors){
+		Sensor accelerometer;
+		Sensor gravity;
+		Sensor orientation;
+		Sensor gyroscope;
+		
+		if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
+			accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+			accelerometer.getVendor();
+			sensorManager.registerListener(new SensorEventListener() {
+				
+				@Override
+				public void onSensorChanged(SensorEvent event) {
+					float[]f = event.values;
+					
+						try {
+							sectionLabel.setText("Acceleroleter \nX-axis: "+f[0]+"\nY-axis: "+f[1]+"\nZ-axis"+f[2]);
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+					
+					
+					
+				}
+				
+				@Override
+				public void onAccuracyChanged(Sensor sensor, int accuracy) {
+					// TODO Auto-generated method stub
+					
+				}
+			}, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+		}
+		if (sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY) != null){
+			gravity = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+		}
+		if (sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION) != null){
+			orientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+			orientation.getVendor();
+		}
+		if (sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null){
+			gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+			gyroscope.getVendor();
+		}
+		
+		sensorManager.registerListener(new SensorEventListener() {
+			
+			@Override
+			public void onSensorChanged(SensorEvent event) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onAccuracyChanged(Sensor sensor, int accuracy) {
+				// TODO Auto-generated method stub
+				
+			}
+		}, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
+		
+		
 	}
 
 	@Override
@@ -135,9 +226,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 
 		@Override
 		public Fragment getItem(int position) {
-			// getItem is called to instantiate the fragment for the given page.
-			// Return a PlaceholderFragment (defined as a static inner class
-			// below).
+
 			switch (position) {
 			case 0:
 				return PlaceholderFragment.newInstance(position + 1);
@@ -166,9 +255,57 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 				return getString(R.string.title_section3).toUpperCase(l);
 			}
 			return null;
-		}
+		}	
+
 	}
 
+	@Override
+	public void onConnectionFailed(ConnectionResult result) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onConnected(Bundle bundle) {		
+		mapHandler.initMap();		
+	}
+
+	@Override
+	public void onConnectionSuspended(int i) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	protected synchronized void buildGoogleApiClient() {
+	    mGoogleApiClient = new GoogleApiClient.Builder(this)
+	        .addConnectionCallbacks(this)
+	        .addOnConnectionFailedListener(this)
+	        .addApi(LocationServices.API)
+	        .build();
+	}
+	
+	protected void createLocationRequest() {
+	    mLocationRequest = new LocationRequest();
+	    mLocationRequest.setInterval(10000);
+	    mLocationRequest.setFastestInterval(5000);
+	    mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+	}
+	
+	protected void startLocationUpdates() {
+	    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+	}
+	
+	@Override
+	public void onLocationChanged(Location loc) {
+		
+	}
+	
+	
+	
+	
+	//fragments
+	
+	
 	/**
 	 * A placeholder fragment containing a simple view.
 	 */
@@ -190,20 +327,22 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 			return fragment;
 		}
 
-		public PlaceholderFragment() {
-		}
-
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.fragment_main, container,
 					false);
+			
+			sectionLabel = (TextView) rootView.findViewById(R.id.textView1);
+			System.out.println(sectionLabel.getText());
+			
 			return rootView;
 		}
 	}
 	
+	
 	/**
-	 * A placeholder fragment containing a simple view.
+	 * A placeholder fragment containing a Map view.
 	 */
 	public static class MyMapFragment extends Fragment {
 		/**
@@ -211,93 +350,42 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 		 * fragment.
 		 */
 		private static final String ARG_SECTION_NUMBER = "section_number";
-		private static GoogleMap mMap;
-		private static Double latitude, longitude;
 
 		/**
 		 * Returns a new instance of this fragment for the given section number.
 		 */
 		public static MyMapFragment newInstance(int sectionNumber) {
-			MyMapFragment fragment = new MyMapFragment();
+			
+			MyMapFragment fragment = new MyMapFragment();			
 			Bundle args = new Bundle();
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
 			fragment.setArguments(args);
-			return fragment;
-		}
-
-		public MyMapFragment() {
+			return fragment;			
 		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			if (container == null) {
-			    return null;
-			}
-			View rootView = null;
-			try{
-				rootView = (RelativeLayout)inflater.inflate(R.layout.fragment_map, container, false);	
-			}catch(Exception e){
-				e.printStackTrace();
-			}
-			latitude = 49.9129847;
-            longitude = 15.7669789;
-
-            setUpMapIfNeeded(); // For setting up the MapFragment
 			
-			return rootView;
-		}
-
-		private void setUpMapIfNeeded() {
-			// Do a null check to confirm that we have not already instantiated the map.
-		    if (mMap == null) {
-		        // Try to obtain the map from the SupportMapFragment.		        
-		    	mMap = ((MapFragment) MainActivity.fragmentManager.findFragmentById(R.id.location_map)).getMap();
-		        // Check if we were successful in obtaining the map.
-		        if (mMap != null)
-		            setUpMap();
-		    }
-			
-		}
-
-		private static void setUpMap() {
-		    // For showing a move to my loction button
-		    mMap.setMyLocationEnabled(true);
-		    // For dropping a marker at a point on the Map
-		    mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).title("My Home").snippet("Home Address"));
-		    // For zooming automatically to the Dropped PIN Location
-		    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude,
-		            longitude), 12.0f));
+						
+			return mapHandler.getRootView(inflater, container);
 		}
 
 		@Override
 		public void onViewCreated(View view, Bundle savedInstanceState) {
-		    // TODO Auto-generated method stub
-		    if (mMap != null)
-		        setUpMap();
-
-		    if (mMap == null) {
-		        // Try to obtain the map from the SupportMapFragment.
-		        mMap = ((MapFragment) MainActivity.fragmentManager.findFragmentById(R.id.location_map)).getMap(); // getMap is deprecated
-		        // Check if we were successful in obtaining the map.
-		        if (mMap != null)
-		            setUpMap();
-		    }
+			mapHandler.initMap();    
 		}
 
-		/**** The mapfragment's id must be removed from the FragmentManager
-		 **** or else if the same it is passed on the next time then 
-		 **** app will crash ****/
 		@Override
-		public void onDestroyView() {
+		public void onDestroyView() {		    
+		    mapHandler.destroyMap();
 		    super.onDestroyView();
-		    if (mMap != null) {
-		        MainActivity.fragmentManager.beginTransaction()
-		            .remove(MainActivity.fragmentManager.findFragmentById(R.id.location_map)).commit();
-		        mMap = null;
-		    }
 		}		
 		
 	}
+
+
+	
+	
 
 }
