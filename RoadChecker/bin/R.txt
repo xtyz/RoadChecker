@@ -97,7 +97,8 @@ int drawable ic_plusone_standard_off_client 0x7f02001d
 int drawable ic_plusone_tall_off_client 0x7f02001e
 int drawable powered_by_google_dark 0x7f02001f
 int drawable powered_by_google_light 0x7f020020
-int id action_settings 0x7f0b001a
+int id accelerometer 0x7f0b0018
+int id action_settings 0x7f0b001c
 int id adjust_height 0x7f0b0000
 int id adjust_width 0x7f0b0001
 int id book_now 0x7f0b0010
@@ -106,11 +107,13 @@ int id buy_now 0x7f0b0011
 int id buy_with_google 0x7f0b0012
 int id classic 0x7f0b0014
 int id donate_with_google 0x7f0b0013
+int id graph 0x7f0b001a
 int id grayscale 0x7f0b0015
+int id gyroscope 0x7f0b0019
 int id holo_dark 0x7f0b0007
 int id holo_light 0x7f0b0008
 int id hybrid 0x7f0b0003
-int id location_map 0x7f0b0019
+int id location_map 0x7f0b001b
 int id match_parent 0x7f0b000e
 int id monochrome 0x7f0b0016
 int id none 0x7f0b0002
@@ -122,7 +125,6 @@ int id satellite 0x7f0b0005
 int id selectionDetails 0x7f0b000d
 int id strict_sandbox 0x7f0b000b
 int id terrain 0x7f0b0006
-int id textView1 0x7f0b0018
 int id wrap_content 0x7f0b000f
 int integer google_play_services_version 0x7f080000
 int layout activity_main 0x7f030000

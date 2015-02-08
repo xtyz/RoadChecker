@@ -1,5 +1,6 @@
 package cz.pochoto.roadchecker;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -18,6 +19,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,10 +40,14 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 import cz.pochoto.roadchecker.handlers.MapHandler;
 
-public class MainActivity extends Activity implements ActionBar.TabListener, ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
+public class MainActivity extends Activity implements ActionBar.TabListener,
+		ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -50,18 +56,25 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Con
 	 * becomes too memory intensive, it may be best to switch to a
 	 * {@link android.support.v13.app.FragmentStatePagerAdapter}.
 	 */
-	SectionsPagerAdapter mSectionsPagerAdapter;	
-	
-	public static MapHandler mapHandler;	
-	public static FragmentManager fragmentManager;	
+	SectionsPagerAdapter mSectionsPagerAdapter;
+
+	public static MapHandler mapHandler;
+	public static FragmentManager fragmentManager;
 	public static SensorManager sensorManager;
+
+	public static TextView accelerometerLabel, gyroscopeLabel;
+	public static GraphView graph;
+	public static int count = 50;
+
+	public static LineGraphSeries<DataPoint> seriesX = new LineGraphSeries<DataPoint>();
+	public static LineGraphSeries<DataPoint> seriesY = new LineGraphSeries<DataPoint>();
+	public static LineGraphSeries<DataPoint> seriesZ = new LineGraphSeries<DataPoint>();
 	
-	public static TextView sectionLabel;
 
 	/**
 	 * The {@link ViewPager} that will host the section contents.
 	 */
-	ViewPager mViewPager;	
+	ViewPager mViewPager;
 
 	private static GoogleApiClient mGoogleApiClient;
 	private static LocationRequest mLocationRequest;
@@ -71,21 +84,18 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Con
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		buildGoogleApiClient();
-		
+
 		mapHandler = new MapHandler();
-		sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		fragmentManager = getFragmentManager();
-		
-		
-		
+
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-		
-				
+
 		sensorManager(sensorManager.getSensorList(Sensor.TYPE_ALL));
-		
-		mSectionsPagerAdapter = new SectionsPagerAdapter(fragmentManager);		
+
+		mSectionsPagerAdapter = new SectionsPagerAdapter(fragmentManager);
 
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -114,67 +124,74 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Con
 					.setTabListener(this));
 		}
 	}
-	
-	private void sensorManager(List<Sensor> sensors){
-		Sensor accelerometer;
-		Sensor gravity;
+
+	private void sensorManager(final List<Sensor> sensors) {
+
 		Sensor orientation;
-		Sensor gyroscope;
-		
-		if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
-			accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-			accelerometer.getVendor();
+
+		if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+			
 			sensorManager.registerListener(new SensorEventListener() {
-				
+
 				@Override
 				public void onSensorChanged(SensorEvent event) {
-					float[]f = event.values;
-					
-						try {
-							sectionLabel.setText("Acceleroleter \nX-axis: "+f[0]+"\nY-axis: "+f[1]+"\nZ-axis"+f[2]);
-						} catch (Exception e) {
-							// TODO: handle exception
+					float[] f = event.values;
+
+					try {
+						accelerometerLabel.setText("Acceleroleter \nX-axis: "
+								+ f[0] + "\nY-axis: " + f[1] + "\nZ-axis: "
+								+ f[2]);
+
+//						if (list.size() < 100) {
+//							DataPoint point = new DataPoint(list.size(), f[0]);
+//							list.add(point);
+//						} else {
+//
+//							list.remove(0);
+//							for (int i = 0; i < list.size(); i++) {
+//								list.set(i,	new DataPoint(i, list.get(i).getY()));
+//							}
+//							list.add(new DataPoint(list.size(), f[0]));
+//
+//						}
+//
+//						points = new DataPoint[list.size()];
+//
+//						series.resetData(list.toArray(points));	
+						
+						
+						if(seriesX.getHighestValueX() < count){
+							if(seriesX.isEmpty()){
+								seriesX.appendData(new DataPoint(0, f[0]), false, count);
+								seriesY.appendData(new DataPoint(0, f[1]), false, count);
+								seriesZ.appendData(new DataPoint(0, f[2]), false, count);
+							}else{
+								seriesX.appendData(new DataPoint(seriesX.getHighestValueX() + 1, f[0]), false, count);
+								seriesY.appendData(new DataPoint(seriesX.getHighestValueX() + 1, f[1]), false, count);
+								seriesZ.appendData(new DataPoint(seriesX.getHighestValueX() + 1, f[2]), false, count);
+							}							
+						}else{
+							seriesX.resetData(new DataPoint[]{});
+							seriesY.resetData(new DataPoint[]{});
+							seriesZ.resetData(new DataPoint[]{});
+														
 						}
-					
-					
-					
+
+					} catch (Exception e) {
+						
+					}
+
 				}
-				
+
 				@Override
 				public void onAccuracyChanged(Sensor sensor, int accuracy) {
 					// TODO Auto-generated method stub
-					
+
 				}
-			}, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+			}, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+					SensorManager.SENSOR_DELAY_UI);
 		}
-		if (sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY) != null){
-			gravity = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
-		}
-		if (sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION) != null){
-			orientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
-			orientation.getVendor();
-		}
-		if (sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null){
-			gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-			gyroscope.getVendor();
-		}
-		
-		sensorManager.registerListener(new SensorEventListener() {
-			
-			@Override
-			public void onSensorChanged(SensorEvent event) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void onAccuracyChanged(Sensor sensor, int accuracy) {
-				// TODO Auto-generated method stub
-				
-			}
-		}, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
-		
-		
+
 	}
 
 	@Override
@@ -255,57 +272,53 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Con
 				return getString(R.string.title_section3).toUpperCase(l);
 			}
 			return null;
-		}	
+		}
 
 	}
 
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	public void onConnected(Bundle bundle) {		
-		mapHandler.initMap();		
+	public void onConnected(Bundle bundle) {
+		mapHandler.initMap();
 	}
 
 	@Override
 	public void onConnectionSuspended(int i) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	protected synchronized void buildGoogleApiClient() {
-	    mGoogleApiClient = new GoogleApiClient.Builder(this)
-	        .addConnectionCallbacks(this)
-	        .addOnConnectionFailedListener(this)
-	        .addApi(LocationServices.API)
-	        .build();
+		mGoogleApiClient = new GoogleApiClient.Builder(this)
+				.addConnectionCallbacks(this)
+				.addOnConnectionFailedListener(this)
+				.addApi(LocationServices.API).build();
 	}
-	
+
 	protected void createLocationRequest() {
-	    mLocationRequest = new LocationRequest();
-	    mLocationRequest.setInterval(10000);
-	    mLocationRequest.setFastestInterval(5000);
-	    mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		mLocationRequest = new LocationRequest();
+		mLocationRequest.setInterval(10000);
+		mLocationRequest.setFastestInterval(5000);
+		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 	}
-	
+
 	protected void startLocationUpdates() {
-	    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+		LocationServices.FusedLocationApi.requestLocationUpdates(
+				mGoogleApiClient, mLocationRequest, this);
 	}
-	
+
 	@Override
 	public void onLocationChanged(Location loc) {
-		
+
 	}
-	
-	
-	
-	
-	//fragments
-	
-	
+
+	// fragments
+
 	/**
 	 * A placeholder fragment containing a simple view.
 	 */
@@ -332,15 +345,33 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Con
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.fragment_main, container,
 					false);
-			
-			sectionLabel = (TextView) rootView.findViewById(R.id.textView1);
-			System.out.println(sectionLabel.getText());
-			
+
+			accelerometerLabel = (TextView) rootView
+					.findViewById(R.id.accelerometer);
+			gyroscopeLabel = (TextView) rootView.findViewById(R.id.gyroscope);
+
+			if (graph == null) {
+				graph = (GraphView) rootView.findViewById(R.id.graph);
+
+				graph.getViewport().setMaxY(20);
+				graph.getViewport().setMinY(-20);
+				graph.getViewport().setYAxisBoundsManual(true);
+
+				graph.getViewport().setMaxX(count);
+				graph.getViewport().setMinX(0);
+				graph.getViewport().setXAxisBoundsManual(true);
+
+				graph.addSeries(seriesX);
+				graph.addSeries(seriesY);
+				seriesY.setColor(Color.RED);				
+				graph.addSeries(seriesZ);
+				seriesZ.setColor(Color.GREEN);
+			}
+
 			return rootView;
 		}
 	}
-	
-	
+
 	/**
 	 * A placeholder fragment containing a Map view.
 	 */
@@ -355,37 +386,32 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Con
 		 * Returns a new instance of this fragment for the given section number.
 		 */
 		public static MyMapFragment newInstance(int sectionNumber) {
-			
-			MyMapFragment fragment = new MyMapFragment();			
+
+			MyMapFragment fragment = new MyMapFragment();
 			Bundle args = new Bundle();
 			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
 			fragment.setArguments(args);
-			return fragment;			
+			return fragment;
 		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			
-						
+
 			return mapHandler.getRootView(inflater, container);
 		}
 
 		@Override
 		public void onViewCreated(View view, Bundle savedInstanceState) {
-			mapHandler.initMap();    
+			mapHandler.initMap();
 		}
 
 		@Override
-		public void onDestroyView() {		    
-		    mapHandler.destroyMap();
-		    super.onDestroyView();
-		}		
-		
+		public void onDestroyView() {
+			mapHandler.destroyMap();
+			super.onDestroyView();
+		}
+
 	}
-
-
-	
-	
 
 }

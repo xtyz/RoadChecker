@@ -9,7 +9,7 @@
     tools:context="cz.pochoto.roadchecker.MainActivity$PlaceholderFragment" >
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/accelerometer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -17,5 +17,25 @@
         android:layout_alignParentTop="true"
         android:text="Large Text"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/gyroscope"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/accelerometer"
+        android:layout_alignRight="@+id/accelerometer"
+        android:layout_below="@+id/accelerometer"
+        android:layout_marginTop="15dp"
+        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+    
+    <com.jjoe64.graphview.GraphView
+        android:layout_width="match_parent"
+        android:layout_height="200dip"
+        android:layout_alignLeft="@+id/gyroscope"
+        android:layout_alignRight="@+id/gyroscope"
+        android:layout_below="@+id/gyroscope"
+        android:layout_marginTop="15dp"
+        android:id="@+id/graph" />
 
 </RelativeLayout>
