@@ -16,6 +16,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -45,6 +46,7 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import cz.pochoto.roadchecker.handlers.MapHandler;
+import cz.pochoto.roadchecker.views.MyGLSurfaceView;
 
 public class MainActivity extends Activity implements ActionBar.TabListener,
 		ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
@@ -74,7 +76,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	/**
 	 * The {@link ViewPager} that will host the section contents.
 	 */
-	ViewPager mViewPager;
+	protected static ViewPager mViewPager;
+	protected static MyGLSurfaceView mGLView;
 
 	private static GoogleApiClient mGoogleApiClient;
 	private static LocationRequest mLocationRequest;
@@ -138,9 +141,13 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 					float[] f = event.values;
 
 					try {
+						if (mGLView != null) {
+							mGLView.setPosition(f);
+						}
 						accelerometerLabel.setText("Acceleroleter \nX-axis: "
 								+ f[0] + "\nY-axis: " + f[1] + "\nZ-axis: "
 								+ f[2]);
+						
 
 //						if (list.size() < 100) {
 //							DataPoint point = new DataPoint(list.size(), f[0]);
@@ -159,23 +166,23 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 //
 //						series.resetData(list.toArray(points));	
 						
-						
-						if(seriesX.getHighestValueX() < count){
-							if(seriesX.isEmpty()){
-								seriesX.appendData(new DataPoint(0, f[0]), false, count);
-								seriesY.appendData(new DataPoint(0, f[1]), false, count);
-								seriesZ.appendData(new DataPoint(0, f[2]), false, count);
-							}else{
-								seriesX.appendData(new DataPoint(seriesX.getHighestValueX() + 1, f[0]), false, count);
-								seriesY.appendData(new DataPoint(seriesX.getHighestValueX() + 1, f[1]), false, count);
-								seriesZ.appendData(new DataPoint(seriesX.getHighestValueX() + 1, f[2]), false, count);
-							}							
-						}else{
-							seriesX.resetData(new DataPoint[]{});
-							seriesY.resetData(new DataPoint[]{});
-							seriesZ.resetData(new DataPoint[]{});
-														
-						}
+//						
+//						if(seriesX.getHighestValueX() < count){
+//							if(seriesX.isEmpty()){
+//								seriesX.appendData(new DataPoint(0, f[0]), false, count);
+//								seriesY.appendData(new DataPoint(0, f[1]), false, count);
+//								seriesZ.appendData(new DataPoint(0, f[2]), false, count);
+//							}else{
+//								seriesX.appendData(new DataPoint(seriesX.getHighestValueX() + 1, f[0]), false, count);
+//								seriesY.appendData(new DataPoint(seriesX.getHighestValueX() + 1, f[1]), false, count);
+//								seriesZ.appendData(new DataPoint(seriesX.getHighestValueX() + 1, f[2]), false, count);
+//							}							
+//						}else{
+//							seriesX.resetData(new DataPoint[]{});
+//							seriesY.resetData(new DataPoint[]{});
+//							seriesZ.resetData(new DataPoint[]{});
+//														
+//						}
 
 					} catch (Exception e) {
 						
@@ -250,7 +257,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 			case 1:
 				return MyMapFragment.newInstance(position + 1);
 			default:
-				return PlaceholderFragment.newInstance(position + 1);
+				return GLSurfaceFragment.newInstance(position + 1);
 			}
 		}
 
@@ -412,6 +419,52 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 			super.onDestroyView();
 		}
 
+	}
+	
+	/**
+	 * A placeholder fragment containing a GLSurface view.
+	 */
+	public static class GLSurfaceFragment extends Fragment  {
+		
+		private static final String ARG_SECTION_NUMBER = "section_number";
+		
+
+		public static GLSurfaceFragment newInstance(int sectionNumber) {
+			GLSurfaceFragment fragment = new GLSurfaceFragment();
+			Bundle args = new Bundle();
+			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+			fragment.setArguments(args);
+			return fragment;
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View rootView = inflater.inflate(R.layout.fragment_glsurface, container,
+					false);
+			
+			mGLView = (MyGLSurfaceView)rootView.findViewById(R.id.gl_surface_view);
+			TextView glSurfaceTextView = (TextView)rootView.findViewById(R.id.gl_surface_text);
+			glSurfaceTextView.setTextColor(Color.WHITE);
+			mGLView.setSensorManager(sensorManager);
+			mGLView.setTextView(glSurfaceTextView);
+			return rootView;
+		}
+		
+		@Override
+		public void onPause(){
+			if(mGLView != null){
+				mGLView.onPause();
+			}
+			super.onPause();
+		}
+		
+		public void onResume(){
+			if(mGLView != null){
+				mGLView.onResume();
+			}
+			super.onResume();
+		}
 	}
 
 }
