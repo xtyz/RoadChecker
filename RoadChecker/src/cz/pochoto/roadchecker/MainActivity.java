@@ -1,6 +1,5 @@
 package cz.pochoto.roadchecker;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -16,17 +15,14 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
-import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -36,16 +32,13 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import cz.pochoto.roadchecker.handlers.MapHandler;
+import cz.pochoto.roadchecker.listeners.AbstractSensorEventListener;
+import cz.pochoto.roadchecker.listeners.AccelerometterListener;
 import cz.pochoto.roadchecker.views.MyGLSurfaceView;
 
 public class MainActivity extends Activity implements ActionBar.TabListener,
@@ -63,14 +56,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	public static MapHandler mapHandler;
 	public static FragmentManager fragmentManager;
 	public static SensorManager sensorManager;
+	public static AbstractSensorEventListener acceletometerListener;
 
 	public static TextView accelerometerLabel, gyroscopeLabel;
-	public static GraphView graph;
 	public static int count = 50;
-
-	public static LineGraphSeries<DataPoint> seriesX = new LineGraphSeries<DataPoint>();
-	public static LineGraphSeries<DataPoint> seriesY = new LineGraphSeries<DataPoint>();
-	public static LineGraphSeries<DataPoint> seriesZ = new LineGraphSeries<DataPoint>();
+	
 	
 
 	/**
@@ -87,6 +77,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		buildGoogleApiClient();
+		
+		acceletometerListener = new AccelerometterListener();
 
 		mapHandler = new MapHandler();
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -94,9 +86,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-		sensorManager(sensorManager.getSensorList(Sensor.TYPE_ALL));
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);		
 
 		mSectionsPagerAdapter = new SectionsPagerAdapter(fragmentManager);
 
@@ -126,79 +116,6 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 					.setText(mSectionsPagerAdapter.getPageTitle(i))
 					.setTabListener(this));
 		}
-	}
-
-	private void sensorManager(final List<Sensor> sensors) {
-
-		Sensor orientation;
-
-		if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-			
-			sensorManager.registerListener(new SensorEventListener() {
-
-				@Override
-				public void onSensorChanged(SensorEvent event) {
-					float[] f = event.values;
-
-					try {
-						if (mGLView != null) {
-							mGLView.setPosition(f);
-						}
-						accelerometerLabel.setText("Acceleroleter \nX-axis: "
-								+ f[0] + "\nY-axis: " + f[1] + "\nZ-axis: "
-								+ f[2]);
-						
-
-//						if (list.size() < 100) {
-//							DataPoint point = new DataPoint(list.size(), f[0]);
-//							list.add(point);
-//						} else {
-//
-//							list.remove(0);
-//							for (int i = 0; i < list.size(); i++) {
-//								list.set(i,	new DataPoint(i, list.get(i).getY()));
-//							}
-//							list.add(new DataPoint(list.size(), f[0]));
-//
-//						}
-//
-//						points = new DataPoint[list.size()];
-//
-//						series.resetData(list.toArray(points));	
-						
-//						
-//						if(seriesX.getHighestValueX() < count){
-//							if(seriesX.isEmpty()){
-//								seriesX.appendData(new DataPoint(0, f[0]), false, count);
-//								seriesY.appendData(new DataPoint(0, f[1]), false, count);
-//								seriesZ.appendData(new DataPoint(0, f[2]), false, count);
-//							}else{
-//								seriesX.appendData(new DataPoint(seriesX.getHighestValueX() + 1, f[0]), false, count);
-//								seriesY.appendData(new DataPoint(seriesX.getHighestValueX() + 1, f[1]), false, count);
-//								seriesZ.appendData(new DataPoint(seriesX.getHighestValueX() + 1, f[2]), false, count);
-//							}							
-//						}else{
-//							seriesX.resetData(new DataPoint[]{});
-//							seriesY.resetData(new DataPoint[]{});
-//							seriesZ.resetData(new DataPoint[]{});
-//														
-//						}
-
-					} catch (Exception e) {
-						
-					}
-
-				}
-
-				@Override
-				public void onAccuracyChanged(Sensor sensor, int accuracy) {
-					// TODO Auto-generated method stub
-
-				}
-			}, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-					SensorManager.SENSOR_DELAY_UI);
-		}
-
 	}
 
 	@Override
@@ -356,26 +273,35 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 			accelerometerLabel = (TextView) rootView
 					.findViewById(R.id.accelerometer);
 			gyroscopeLabel = (TextView) rootView.findViewById(R.id.gyroscope);
+			
+			acceletometerListener.setAccelerometerLabel(accelerometerLabel);
+			acceletometerListener.setGyroscopeLabel(gyroscopeLabel);
+			registerSensorListeners();
+			
+			return rootView;
+		}
+		
+		@Override
+		public void onPause() {
+			//kdyz se neodregistruje, bezi na pozadi.. toho se necha vyuzit :)
+			sensorManager.unregisterListener(acceletometerListener);
+			super.onPause();
+		}
+		
+		@Override
+		public void onResume() {
+			registerSensorListeners();
+			super.onResume();
+		}
+		
+		private static void registerSensorListeners() {
 
-			if (graph == null) {
-				graph = (GraphView) rootView.findViewById(R.id.graph);
-
-				graph.getViewport().setMaxY(20);
-				graph.getViewport().setMinY(-20);
-				graph.getViewport().setYAxisBoundsManual(true);
-
-				graph.getViewport().setMaxX(count);
-				graph.getViewport().setMinX(0);
-				graph.getViewport().setXAxisBoundsManual(true);
-
-				graph.addSeries(seriesX);
-				graph.addSeries(seriesY);
-				seriesY.setColor(Color.RED);				
-				graph.addSeries(seriesZ);
-				seriesZ.setColor(Color.GREEN);
+			if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+							
+				sensorManager.registerListener(acceletometerListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+						SensorManager.SENSOR_DELAY_UI);
 			}
 
-			return rootView;
 		}
 	}
 
