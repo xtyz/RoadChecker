@@ -141,9 +141,9 @@ public class Triangle {
 
 	public void setTriangleCoords(float[] f) {
 		float[]newCoards = {
-			f[0]/1000f,f[1]/1000f,f[2]*0,
-			f[0]/1000f,f[1]/1000f,f[2]*0,
-			f[0]/1000f,f[1]/1000f,f[2]*0				
+			f[0]/10f,f[1]/10f,0,
+			f[0]/10f,f[1]/10f,0,
+			f[0]/10f,f[1]/10f,0				
 		};
 		
 		for(int i = 0; i<triangleCoords.length; i++){

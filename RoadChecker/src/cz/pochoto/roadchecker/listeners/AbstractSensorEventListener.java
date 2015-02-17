@@ -1,5 +1,6 @@
 package cz.pochoto.roadchecker.listeners;
 
+import cz.pochoto.roadchecker.views.MyGLSurfaceView;
 import android.hardware.SensorEventListener;
 import android.widget.TextView;
 
@@ -11,4 +12,6 @@ public interface AbstractSensorEventListener extends SensorEventListener {
 	public TextView getGyroscopeLabel();
 
 	public void setGyroscopeLabel(TextView gyroscopeLabel);
+
+	public void setSurfaceView(MyGLSurfaceView myGLSurfaceView);
 }

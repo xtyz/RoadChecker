@@ -1,5 +1,6 @@
 package cz.pochoto.roadchecker.views;
 
+import cz.pochoto.roadchecker.listeners.AbstractSensorEventListener;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
@@ -20,6 +21,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 	private float mPreviousX;
 	private float mPreviousY;
 	private TextView textView;
+	private AbstractSensorEventListener accelerometerListener;
 
 	public MyGLSurfaceView(Context context) {
 		super(context);
@@ -85,30 +87,23 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		requestRender();
 	}
 
-	public void setSensorManager(SensorManager sensorManager) {
-		if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-
-			sensorManager.registerListener(new SensorEventListener() {
-
-				@Override
-				public void onSensorChanged(SensorEvent event) {
-					float[] f = event.values;
-					
-					textView.setText(Math.round(f[0])+"\n"+Math.round(f[1])+"\n"+Math.round(f[2]));
-					setPosition(f);
-				}
-
-				@Override
-				public void onAccuracyChanged(Sensor sensor, int accuracy) {
-				}
-			}, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-					SensorManager.SENSOR_DELAY_UI);
-		}
-
-	}
 
 	public void setTextView(TextView glSurfaceTextView) {
 		this.textView = glSurfaceTextView;
+		
+	}
+	
+	public TextView getTextView(){
+		if(textView == null){
+			return null;
+		}
+		return textView;
+	}
+
+	public void setAccelerometerListener(
+			AbstractSensorEventListener acceletometerListener) {
+		this.accelerometerListener = acceletometerListener;
+		this.accelerometerListener.setSurfaceView(this);
 		
 	}
 

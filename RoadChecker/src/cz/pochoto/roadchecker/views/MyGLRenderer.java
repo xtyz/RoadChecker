@@ -33,8 +33,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	private final float[] mModelMatrix = new float[16];
 
 	private float mAngle;
-	private float[] fStable = { 0, 0, 0 };
-	private float[] f = { 0, 0, 0 };
+	private float[] f = { 0, 0 };
 
 	@Override
 	public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -70,7 +69,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		// Leave this code out when using TouchEvents.
 		// long time = SystemClock.uptimeMillis() % 4000L;
 		// float angle = 0.090f * ((int) time);
-		Matrix.translateM(mModelMatrix, 0, f[0] / 1000f, -f[1] / 1000f, 0);
+		Matrix.translateM(mModelMatrix, 0, f[0] / 10f, -f[1] / 10f, 0);
 		Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
 		mTriangle.setTriangleCoords(f);
 		
@@ -81,7 +80,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 				+ "----------------------------------------");
 		f[0] = 0;
 		f[1] = 0;
-		f[2] = 0;
+		
 
 		// Combine the rotation matrix with the projection and camera view
 		// Note that the mMVPMatrix factor *must be first* in order

@@ -39,6 +39,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import cz.pochoto.roadchecker.handlers.MapHandler;
 import cz.pochoto.roadchecker.listeners.AbstractSensorEventListener;
 import cz.pochoto.roadchecker.listeners.AccelerometterListener;
+import cz.pochoto.roadchecker.listeners.MySensorEventListener;
 import cz.pochoto.roadchecker.views.MyGLSurfaceView;
 
 public class MainActivity extends Activity implements ActionBar.TabListener,
@@ -56,7 +57,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	public static MapHandler mapHandler;
 	public static FragmentManager fragmentManager;
 	public static SensorManager sensorManager;
-	public static AbstractSensorEventListener acceletometerListener;
+	//public static AbstractSensorEventListener acceletometerListener;
+	public static AbstractSensorEventListener mSensorEventListener;
 
 	public static TextView accelerometerLabel, gyroscopeLabel;
 	public static int count = 50;
@@ -78,7 +80,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		setContentView(R.layout.activity_main);
 		buildGoogleApiClient();
 		
-		acceletometerListener = new AccelerometterListener();
+		//acceletometerListener = new AccelerometterListener();
+		mSensorEventListener = new MySensorEventListener();
 
 		mapHandler = new MapHandler();
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -274,8 +277,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 					.findViewById(R.id.accelerometer);
 			gyroscopeLabel = (TextView) rootView.findViewById(R.id.gyroscope);
 			
-			acceletometerListener.setAccelerometerLabel(accelerometerLabel);
-			acceletometerListener.setGyroscopeLabel(gyroscopeLabel);
+			//acceletometerListener.setAccelerometerLabel(accelerometerLabel);
+			//acceletometerListener.setGyroscopeLabel(gyroscopeLabel);
+			mSensorEventListener.setAccelerometerLabel(accelerometerLabel);
+			mSensorEventListener.setGyroscopeLabel(gyroscopeLabel);
 			registerSensorListeners();
 			
 			return rootView;
@@ -284,7 +289,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		@Override
 		public void onPause() {
 			//kdyz se neodregistruje, bezi na pozadi.. toho se necha vyuzit :)
-			sensorManager.unregisterListener(acceletometerListener);
+			//sensorManager.unregisterListener(acceletometerListener);
 			super.onPause();
 		}
 		
@@ -298,7 +303,13 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
 			if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
 							
-				sensorManager.registerListener(acceletometerListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+				sensorManager.registerListener(mSensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+						SensorManager.SENSOR_DELAY_UI);
+			}
+			
+			if (sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null) {
+				
+				sensorManager.registerListener(mSensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
 						SensorManager.SENSOR_DELAY_UI);
 			}
 
@@ -371,9 +382,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 			
 			mGLView = (MyGLSurfaceView)rootView.findViewById(R.id.gl_surface_view);
 			TextView glSurfaceTextView = (TextView)rootView.findViewById(R.id.gl_surface_text);
-			glSurfaceTextView.setTextColor(Color.WHITE);
-			mGLView.setSensorManager(sensorManager);
-			mGLView.setTextView(glSurfaceTextView);
+			glSurfaceTextView.setTextColor(Color.WHITE);			
+			mGLView.setTextView(glSurfaceTextView);			
+			///mGLView.setAccelerometerListener(acceletometerListener);
+			mGLView.setAccelerometerListener(mSensorEventListener);
 			return rootView;
 		}
 		
