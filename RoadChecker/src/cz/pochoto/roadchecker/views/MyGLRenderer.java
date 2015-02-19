@@ -49,7 +49,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onDrawFrame(GL10 unused) {
 		float[] scratch = new float[16];
-		
+
 		Matrix.setIdentityM(mModelMatrix, 0);
 		// Draw background color
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -72,22 +72,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		Matrix.translateM(mModelMatrix, 0, f[0] / 10f, -f[1] / 10f, 0);
 		Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
 		mTriangle.setTriangleCoords(f);
-		
-		float[]t = mTriangle.getTriangleCoords();
-		System.out.println(
-				  t[3] + " / " + t[4]+ "\n"
-				+ t[6] + " / " + t[7]+ "\n"
-				+ "----------------------------------------");
-		f[0] = 0;
-		f[1] = 0;
-		
+
+		float[] t = mTriangle.getTriangleCoords();
+//		System.out.println(t[3] + " / " + t[4] + "\n" + t[6] + " / " + t[7]
+//				+ "\n" + "----------------------------------------");		
+		setPosition(new float[2]);
 
 		// Combine the rotation matrix with the projection and camera view
 		// Note that the mMVPMatrix factor *must be first* in order
 		// for the matrix multiplication product to be correct.
 		Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
 		Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mModelMatrix, 0);
-		
+
 		// Draw triangle
 		mTriangle.draw(scratch);
 	}
@@ -171,8 +167,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		mAngle = angle;
 	}
 
-	public void setPosition(float[] f) {		
-			this.f = f;	
+	public void setPosition(float[] f) {
+		if (f[0] == 0 && f[1] == 0) {
+			if (this.f[0] > 0.01 && this.f[0] < -0.01 && this.f[1] > 0.01 && this.f[1] < -0.01) {
+				if (this.f[0] > 0) {
+					this.f[0] = this.f[0] - 0.001f;					
+				} else {
+					this.f[0] = this.f[0] + 0.001f;
+				}
+				if (this.f[1] > 0) {
+					this.f[1] = this.f[1] - 0.001f;
+				} else {
+					this.f[1] = this.f[1] + 0.001f;
+				}
+			}else{
+				this.f[0] = 0;
+				this.f[1] = 0;
+			}
+		}
+		this.f = f;
 	}
 
 }

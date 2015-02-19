@@ -14,4 +14,6 @@ public interface AbstractSensorEventListener extends SensorEventListener {
 	public void setGyroscopeLabel(TextView gyroscopeLabel);
 
 	public void setSurfaceView(MyGLSurfaceView myGLSurfaceView);
+
+	public void calibrate();
 }

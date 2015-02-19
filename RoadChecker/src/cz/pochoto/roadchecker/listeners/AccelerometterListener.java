@@ -204,6 +204,12 @@ public class AccelerometterListener implements AbstractSensorEventListener {
 	public void setSurfaceView(MyGLSurfaceView myGLSurfaceView) {
 		this.glSurfaceView = myGLSurfaceView;
 		
+	}
+
+	@Override
+	public void calibrate() {
+		// TODO Auto-generated method stub
+		
 	}	
 
 }

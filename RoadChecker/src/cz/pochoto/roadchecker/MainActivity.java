@@ -137,6 +137,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		if (id == R.id.action_settings) {
 			return true;
 		}
+		if (id == R.id.action_calibrate) {
+			mSensorEventListener.calibrate();
+			return true;
+		}
 		return super.onOptionsItemSelected(item);
 	}
 
