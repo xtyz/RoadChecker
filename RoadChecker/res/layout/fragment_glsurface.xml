@@ -14,6 +14,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true" />
@@ -22,9 +24,10 @@
         android:id="@+id/gl_surface_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/gl_surface_view"
+        android:layout_alignEnd="@+id/gl_surface_view"
         android:layout_alignLeft="@+id/gl_surface_view"
         android:layout_alignRight="@+id/gl_surface_view"
-        android:layout_alignTop="@+id/gl_surface_view"
-        android:text="TextView" />
+        android:layout_alignTop="@+id/gl_surface_view" />
 
 </RelativeLayout>

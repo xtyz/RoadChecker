@@ -73,10 +73,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
 		mTriangle.setTriangleCoords(f);
 
-		float[] t = mTriangle.getTriangleCoords();
-//		System.out.println(t[3] + " / " + t[4] + "\n" + t[6] + " / " + t[7]
-//				+ "\n" + "----------------------------------------");		
-		setPosition(new float[2]);
+		//setPosition(new float[2]);
 
 		// Combine the rotation matrix with the projection and camera view
 		// Note that the mMVPMatrix factor *must be first* in order
@@ -169,16 +166,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	public void setPosition(float[] f) {
 		if (f[0] == 0 && f[1] == 0) {
-			if (this.f[0] > 0.01 && this.f[0] < -0.01 && this.f[1] > 0.01 && this.f[1] < -0.01) {
+			if (this.f[0] > 0.1 && this.f[0] < -0.1 && this.f[1] > 0.1 && this.f[1] < -0.1) {
 				if (this.f[0] > 0) {
-					this.f[0] = this.f[0] - 0.001f;					
+					this.f[0] = this.f[0] - 0.0001f;					
 				} else {
-					this.f[0] = this.f[0] + 0.001f;
+					this.f[0] = this.f[0] + 0.0001f;
 				}
 				if (this.f[1] > 0) {
-					this.f[1] = this.f[1] - 0.001f;
+					this.f[1] = this.f[1] - 0.0001f;
 				} else {
-					this.f[1] = this.f[1] + 0.001f;
+					this.f[1] = this.f[1] + 0.0001f;
 				}
 			}else{
 				this.f[0] = 0;

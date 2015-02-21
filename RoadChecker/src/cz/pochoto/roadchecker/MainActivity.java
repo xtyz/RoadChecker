@@ -1,6 +1,5 @@
 package cz.pochoto.roadchecker;
 
-import java.util.List;
 import java.util.Locale;
 
 import android.app.ActionBar;
@@ -11,8 +10,6 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.graphics.Color;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -32,14 +29,10 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
 
 import cz.pochoto.roadchecker.handlers.MapHandler;
-import cz.pochoto.roadchecker.listeners.AbstractSensorEventListener;
-import cz.pochoto.roadchecker.listeners.AccelerometterListener;
 import cz.pochoto.roadchecker.listeners.MySensorEventListener;
+import cz.pochoto.roadchecker.listeners.MySensorEventListenerImpl;
 import cz.pochoto.roadchecker.views.MyGLSurfaceView;
 
 public class MainActivity extends Activity implements ActionBar.TabListener,
@@ -58,7 +51,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	public static FragmentManager fragmentManager;
 	public static SensorManager sensorManager;
 	//public static AbstractSensorEventListener acceletometerListener;
-	public static AbstractSensorEventListener mSensorEventListener;
+	public static MySensorEventListener mSensorEventListener;
 
 	public static TextView accelerometerLabel, gyroscopeLabel;
 	public static int count = 50;
@@ -80,8 +73,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		setContentView(R.layout.activity_main);
 		buildGoogleApiClient();
 		
-		//acceletometerListener = new AccelerometterListener();
-		mSensorEventListener = new MySensorEventListener();
+		mSensorEventListener = new MySensorEventListenerImpl();
 
 		mapHandler = new MapHandler();
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -179,9 +171,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 			case 0:
 				return PlaceholderFragment.newInstance(position + 1);
 			case 1:
-				return MyMapFragment.newInstance(position + 1);
-			default:
 				return GLSurfaceFragment.newInstance(position + 1);
+			default:				
+				return MyMapFragment.newInstance(position + 1);
 			}
 		}
 

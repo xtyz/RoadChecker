@@ -44,7 +44,11 @@ public class MapHandler {
 				@Override
 				public void onMyLocationChange(Location loc) {
 					if(cameraMove){
-						mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude(), loc.getLongitude()), 12.0f));
+						try{
+							mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(loc.getLatitude(), loc.getLongitude()), 12.0f));
+						}catch(NullPointerException e){
+							e.printStackTrace();
+						}						
 					}					
 				}
 			});	    

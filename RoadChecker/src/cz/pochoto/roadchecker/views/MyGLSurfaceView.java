@@ -1,13 +1,8 @@
 package cz.pochoto.roadchecker.views;
 
-import cz.pochoto.roadchecker.listeners.AbstractSensorEventListener;
+import cz.pochoto.roadchecker.listeners.MySensorEventListener;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -20,8 +15,8 @@ public class MyGLSurfaceView extends GLSurfaceView {
 	private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
 	private float mPreviousX;
 	private float mPreviousY;
-	private TextView textView;
-	private AbstractSensorEventListener accelerometerListener;
+	private TextView rightTextView;
+	private MySensorEventListener sensorEventListener;
 
 	public MyGLSurfaceView(Context context) {
 		super(context);
@@ -89,21 +84,18 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
 
 	public void setTextView(TextView glSurfaceTextView) {
-		this.textView = glSurfaceTextView;
+		this.rightTextView = glSurfaceTextView;
 		
 	}
 	
 	public TextView getTextView(){
-		if(textView == null){
-			return null;
-		}
-		return textView;
+		return rightTextView;
 	}
 
 	public void setAccelerometerListener(
-			AbstractSensorEventListener acceletometerListener) {
-		this.accelerometerListener = acceletometerListener;
-		this.accelerometerListener.setSurfaceView(this);
+			MySensorEventListener sensorEventListener) {
+		this.sensorEventListener = sensorEventListener;
+		this.sensorEventListener.setSurfaceView(this);
 		
 	}
 

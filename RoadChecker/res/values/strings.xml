@@ -3,8 +3,8 @@
 
     <string name="app_name">Road Checker</string>
     <string name="title_section1">Hlavní</string>
-    <string name="title_section2">Mapa</string>
-    <string name="title_section3">Ostatní</string>
+    <string name="title_section2">Vizualizace</string>
+    <string name="title_section3">Mapa</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Nastavení</string>
     <string name="action_calibrate">Kalibrace</string>
