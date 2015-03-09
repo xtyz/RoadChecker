@@ -10,12 +10,8 @@ import android.widget.TextView;
 public class MySensorEventListenerImpl implements MySensorEventListener {
 	private TextView accelerometerLabel, gyroscopeLabel;
 	private MyGLSurfaceView glSurfaceView;
-	private String accLabel;
-
+	
 	float[] stableR = null;
-	/**
-	 * Rotation
-	 */
 	int calibrated = 0;
 	float[] currentR0 = new float[16];
 	float[] currentR = new float[16];
@@ -25,11 +21,12 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 	float[] accelerationG = new float[16];
 	float[] geomag = new float[3];
 	float[] orientVals = new float[3];
-	double stableGValue, currentGValue;
+	double stableGValue, currentGValue, accelerationGValue;
 
 	final float pi = (float) Math.PI;
 	final float rad2deg = 180 / pi;
 	private float[] angleChange = new float[3];
+	public static String endl = "\n";
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
@@ -65,22 +62,21 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 
 			currentGValue = getVectorLenght(currentG);
 			stableGValue = getVectorLenght(stableG);
+			accelerationGValue = Math.abs(currentGValue - stableGValue);
 			
 					
 			
 			// kdyz neni rozdil prilis velky, kalibruj jinak znazorni zrychleni
-			if ((Math.abs(currentGValue - stableGValue) < 0.2 && Math
-					.abs(currentGValue - stableGValue) > -0.2)
+			if ((accelerationGValue < 0.2 && accelerationGValue > -0.2)
 						&& (currentGValue > 9.6 && currentGValue < 9.9)) {
 				
-				//kalibrace !!!
-				//nastavit aby byla akcelerace prevracena furt a ne jen pri kalibraci				
-				
+				//kalibrace			
 				calibration();				
 				
 			} else {
 													
-				//otoceni accelerationG o  minus orientvals (nejprve po x a pak po y) - promitnuti do 2d xy - ax a ay se budou dat promitnout					
+				//otoceni accelerationG o  minus orientvals (nejprve po x a pak po y) - promitnuti do 2d xy - ax a ay se budou dat promitnout
+				//kolem z ne - magnetometr
 				float[] mRotaceX = new float[]{1,0,0,0,
 												0,(float)Math.cos(-orientVals[1]),-(float)Math.sin(-orientVals[1]),0,
 												0,(float)Math.sin(-orientVals[1]),(float)Math.cos(-orientVals[1]),0,
@@ -104,40 +100,8 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 				if (glSurfaceView != null) {
 					glSurfaceView.setPosition(new float[] { u, v });
 				}
-			}
-
-			// ukaz :)
-			accLabel = "Akcelerometr:\nCelkové g:" + currentGValue + " \nx: "
-					+ currentG[0] + "\ny: " + currentG[1] + "\nz: "
-					+ currentG[2] + "\nAkcelerace: \nCelková: "
-					+ Math.abs(currentGValue - stableGValue) + "\nx: "
-					+ accelerationG[0] + "\ny: " + accelerationG[1] + "\nz: "
-					+ accelerationG[2];
-
-			if (accelerometerLabel != null) {
-				accelerometerLabel.setText(accLabel);
-			}
-
-			if (glSurfaceView != null && glSurfaceView.getTextView() != null) {
-				glSurfaceView.getTextView().setText(accLabel);
-			}
-
-			float azimuth = angleChange[0] * rad2deg;
-			float pitch = angleChange[1] * rad2deg;
-			float roll = angleChange[2] * rad2deg;
-
-			String endl = "\n";
-			gyroscopeLabel.setText("Rotation:" + endl + currentR[0] + " "
-					+ currentR[1] + " " + currentR[2] + endl + currentR[4]
-					+ " " + currentR[5] + " " + currentR[6] + endl
-					+ currentR[8] + " " + currentR[9] + " " + currentR[10]
-					+ endl + endl + "Inclination change" + endl
-					+ "Azimuth (z): " + azimuth + endl + "Pitch (x): " + pitch
-					+ endl + "Roll: (y)" + roll + endl + endl
-					+ "Total inclination" + endl + "Azimuth: (z)"
-					+ orientVals[0] * rad2deg + endl + "Pitch: (x)"
-					+ orientVals[1] * rad2deg + endl + "Roll: (y)"
-					+ orientVals[2] * rad2deg + endl);
+			}			
+			showResults();		
 
 		}
 	}
@@ -153,6 +117,45 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	private void showResults(){
+		String accLabel = "Akcelerometr:"+endl+"Celkové g:" + currentGValue + endl+"x: "
+				+ currentG[0] + endl+"y: " + currentG[1] + endl+"z: "
+				+ currentG[2] + endl+"Akcelerace: "+endl+"Celková: "
+				+ accelerationGValue + endl+"x: "
+				+ accelerationG[0] + endl+"y: " + accelerationG[1] + endl+"z: "
+				+ accelerationG[2];		
+
+		float azimuth = angleChange[0] * rad2deg;
+		float pitch = angleChange[1] * rad2deg;
+		float roll = angleChange[2] * rad2deg;
+
+		String gyrLabel = "Rotation:" + endl + currentR[0] + " "
+				+ currentR[1] + " " + currentR[2] + endl + currentR[4]
+				+ " " + currentR[5] + " " + currentR[6] + endl
+				+ currentR[8] + " " + currentR[9] + " " + currentR[10]
+				+ endl + endl + "Inclination change" + endl
+				+ "Azimuth (z): " + azimuth + endl + "Pitch (x): " + pitch
+				+ endl + "Roll: (y)" + roll + endl + endl
+				+ "Total inclination" + endl + "Azimuth: (z)"
+				+ orientVals[0] * rad2deg + endl + "Pitch: (x)"
+				+ orientVals[1] * rad2deg + endl + "Roll: (y)"
+				+ orientVals[2] * rad2deg + endl;
+		
+		
+		if (accelerometerLabel != null) {
+			accelerometerLabel.setText(accLabel);
+		}
+
+		if (glSurfaceView != null && glSurfaceView.getTextView() != null) {
+			glSurfaceView.getTextView().setText(accLabel);
+		}
+		
+		if(gyroscopeLabel != null){
+			gyroscopeLabel.setText(gyrLabel);
+		}
+		
 	}
 	
 	private void calibration(){
@@ -181,6 +184,7 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void convertToCalibrationValues(){
 		//TODO zkontrolovat remap popripade overit správnost
 		if(calibrated == 1){

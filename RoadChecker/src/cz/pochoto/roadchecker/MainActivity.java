@@ -30,11 +30,14 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import cz.pochoto.roadchecker.handlers.GLSurfaceHandler;
 import cz.pochoto.roadchecker.handlers.MapHandler;
+import cz.pochoto.roadchecker.listeners.MyLocationChangeListenerImpl;
 import cz.pochoto.roadchecker.listeners.MySensorEventListener;
 import cz.pochoto.roadchecker.listeners.MySensorEventListenerImpl;
 import cz.pochoto.roadchecker.views.MyGLSurfaceView;
 
+@SuppressWarnings("deprecation")
 public class MainActivity extends Activity implements ActionBar.TabListener,
 		ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 
@@ -48,10 +51,14 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	SectionsPagerAdapter mSectionsPagerAdapter;
 
 	public static MapHandler mapHandler;
+	public static GLSurfaceHandler glSurfaceHandler;
+	
+	
 	public static FragmentManager fragmentManager;
 	public static SensorManager sensorManager;
-	//public static AbstractSensorEventListener acceletometerListener;
+	
 	public static MySensorEventListener mSensorEventListener;
+	public static MyLocationChangeListenerImpl mLocationChangeListener;
 
 	public static TextView accelerometerLabel, gyroscopeLabel;
 	public static int count = 50;
@@ -73,10 +80,22 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		setContentView(R.layout.activity_main);
 		buildGoogleApiClient();
 		
+		// init resources
 		mSensorEventListener = new MySensorEventListenerImpl();
+		mLocationChangeListener = new MyLocationChangeListenerImpl();
+		
+		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+		registerSensorListeners();
 
 		mapHandler = new MapHandler();
-		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+		mapHandler.setLocationChangeListener(mLocationChangeListener);
+		
+		glSurfaceHandler = new GLSurfaceHandler();
+		glSurfaceHandler.setSensorEventListener(mSensorEventListener);
+		
+		
+		
+		
 		fragmentManager = getFragmentManager();
 
 		// Set up the action bar.
@@ -103,13 +122,22 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
 		// For each of the sections in the app, add a tab to the action bar.
 		for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
-			// Create a tab with text corresponding to the page title defined by
-			// the adapter. Also specify this Activity object, which implements
-			// the TabListener interface, as the callback (listener) for when
-			// this tab is selected.
 			actionBar.addTab(actionBar.newTab()
 					.setText(mSectionsPagerAdapter.getPageTitle(i))
 					.setTabListener(this));
+		}
+	}
+	
+	public static void registerSensorListeners() {
+		if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+						
+			sensorManager.registerListener(mSensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+					SensorManager.SENSOR_DELAY_UI);
+		}		
+		if (sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null) {
+			
+			sensorManager.registerListener(mSensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+					SensorManager.SENSOR_DELAY_UI);
 		}
 	}
 
@@ -122,9 +150,6 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
 			return true;
@@ -207,7 +232,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
 	@Override
 	public void onConnected(Bundle bundle) {
-		mapHandler.initMap();
+		mapHandler.init();
 	}
 
 	@Override
@@ -268,20 +293,19 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.fragment_main, container,
 					false);
-
+						
 			accelerometerLabel = (TextView) rootView
 					.findViewById(R.id.accelerometer);
 			gyroscopeLabel = (TextView) rootView.findViewById(R.id.gyroscope);
 			
-			//acceletometerListener.setAccelerometerLabel(accelerometerLabel);
-			//acceletometerListener.setGyroscopeLabel(gyroscopeLabel);
 			mSensorEventListener.setAccelerometerLabel(accelerometerLabel);
 			mSensorEventListener.setGyroscopeLabel(gyroscopeLabel);
-			registerSensorListeners();
+			
 			
 			return rootView;
 		}
 		
+
 		@Override
 		public void onPause() {
 			//kdyz se neodregistruje, bezi na pozadi.. toho se necha vyuzit :)
@@ -290,26 +314,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		}
 		
 		@Override
-		public void onResume() {
-			registerSensorListeners();
+		public void onResume() {			
 			super.onResume();
-		}
+		}		
 		
-		private static void registerSensorListeners() {
-
-			if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-							
-				sensorManager.registerListener(mSensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-						SensorManager.SENSOR_DELAY_UI);
-			}
-			
-			if (sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null) {
-				
-				sensorManager.registerListener(mSensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
-						SensorManager.SENSOR_DELAY_UI);
-			}
-
-		}
 	}
 
 	/**
@@ -343,7 +351,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
 		@Override
 		public void onViewCreated(View view, Bundle savedInstanceState) {
-			mapHandler.initMap();
+			mapHandler.init();
+			super.onViewCreated(view, savedInstanceState);
 		}
 
 		@Override
@@ -373,30 +382,24 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			View rootView = inflater.inflate(R.layout.fragment_glsurface, container,
-					false);
 			
-			mGLView = (MyGLSurfaceView)rootView.findViewById(R.id.gl_surface_view);
-			TextView glSurfaceTextView = (TextView)rootView.findViewById(R.id.gl_surface_text);
-			glSurfaceTextView.setTextColor(Color.WHITE);			
-			mGLView.setTextView(glSurfaceTextView);			
-			///mGLView.setAccelerometerListener(acceletometerListener);
-			mGLView.setAccelerometerListener(mSensorEventListener);
-			return rootView;
+			return glSurfaceHandler.getRootView(inflater, container);
+		}
+		
+		@Override
+		public void onViewCreated(View view, Bundle savedInstanceState) {
+			glSurfaceHandler.init();
+			super.onViewCreated(view, savedInstanceState);
 		}
 		
 		@Override
 		public void onPause(){
-			if(mGLView != null){
-				mGLView.onPause();
-			}
+			glSurfaceHandler.onPause();
 			super.onPause();
 		}
 		
 		public void onResume(){
-			if(mGLView != null){
-				mGLView.onResume();
-			}
+			glSurfaceHandler.onResume();
 			super.onResume();
 		}
 	}

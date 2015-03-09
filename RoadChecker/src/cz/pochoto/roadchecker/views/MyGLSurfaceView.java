@@ -76,6 +76,12 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		mPreviousY = y;
 		return true;
 	}
+	
+	@Override
+	public void onResume() {
+		this.sensorEventListener.setSurfaceView(this);
+		super.onResume();
+	}
 
 	public void setPosition(float[] f) {
 		mRenderer.setPosition(f);		
@@ -92,7 +98,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		return rightTextView;
 	}
 
-	public void setAccelerometerListener(
+	public void setSensorEventListener(
 			MySensorEventListener sensorEventListener) {
 		this.sensorEventListener = sensorEventListener;
 		this.sensorEventListener.setSurfaceView(this);

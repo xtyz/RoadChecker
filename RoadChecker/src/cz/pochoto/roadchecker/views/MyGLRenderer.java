@@ -24,6 +24,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	private static final String TAG = "MyGLRenderer";
 	private Triangle mTriangle;
 	private Square mSquare;
+	private static float SLOW_DOWN = 0.0001f;
+	private static float LIMIT = 0.1f;
 
 	// mMVPMatrix is an abbreviation for "Model View Projection Matrix"
 	private final float[] mMVPMatrix = new float[16];
@@ -64,17 +66,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		mSquare.draw(mMVPMatrix);
 
 		// Create a rotation for the triangle
-
-		// Use the following code to generate constant rotation.
-		// Leave this code out when using TouchEvents.
-		// long time = SystemClock.uptimeMillis() % 4000L;
-		// float angle = 0.090f * ((int) time);
 		Matrix.translateM(mModelMatrix, 0, f[0] / 10f, -f[1] / 10f, 0);
 		Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
 		mTriangle.setTriangleCoords(f);
 
-		//setPosition(new float[2]);
-
+		
 		// Combine the rotation matrix with the projection and camera view
 		// Note that the mMVPMatrix factor *must be first* in order
 		// for the matrix multiplication product to be correct.
@@ -166,16 +162,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	public void setPosition(float[] f) {
 		if (f[0] == 0 && f[1] == 0) {
-			if (this.f[0] > 0.1 && this.f[0] < -0.1 && this.f[1] > 0.1 && this.f[1] < -0.1) {
+			if (this.f[0] > LIMIT && this.f[0] < -LIMIT && this.f[1] > LIMIT && this.f[1] < -LIMIT) {
 				if (this.f[0] > 0) {
-					this.f[0] = this.f[0] - 0.0001f;					
+					this.f[0] = this.f[0] - SLOW_DOWN;					
 				} else {
-					this.f[0] = this.f[0] + 0.0001f;
+					this.f[0] = this.f[0] + SLOW_DOWN;
 				}
 				if (this.f[1] > 0) {
-					this.f[1] = this.f[1] - 0.0001f;
+					this.f[1] = this.f[1] - SLOW_DOWN;
 				} else {
-					this.f[1] = this.f[1] + 0.0001f;
+					this.f[1] = this.f[1] + SLOW_DOWN;
 				}
 			}else{
 				this.f[0] = 0;
