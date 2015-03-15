@@ -133,5 +133,15 @@ public class Square {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
+    
+    public void setColorRed(){
+    	float colorRed[] = {  0.709803922f, 0.4f,0.4f, 1.0f };
+    	this.color = colorRed;
+    }
+
+	public void setColorBlue() {
+		float colorBlue[] = { 0.2f, 0.709803922f, 0.898039216f, 1.0f };
+    	this.color = colorBlue;		
+	}
 
 }

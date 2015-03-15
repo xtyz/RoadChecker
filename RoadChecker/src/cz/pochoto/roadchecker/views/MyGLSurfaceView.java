@@ -83,9 +83,12 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		super.onResume();
 	}
 
-	public void setPosition(float[] f) {
-		mRenderer.setPosition(f);		
-		requestRender();
+	public void setTrianglePosition(float[] f) {
+		mRenderer.setTrianglePosition(f);
+	}
+	
+	public void setSquareScale(double scale){
+		mRenderer.setSquareScale(scale);
 	}
 
 
@@ -103,6 +106,14 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		this.sensorEventListener = sensorEventListener;
 		this.sensorEventListener.setSurfaceView(this);
 		
+	}
+
+	public void render() {
+		requestRender();		
+	}
+
+	public void setMaxSquareScale(double scale) {
+		this.mRenderer.setMaxSquareScale(scale);		
 	}
 
 }

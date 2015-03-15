@@ -31,11 +31,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	private final float[] mMVPMatrix = new float[16];
 	private final float[] mProjectionMatrix = new float[16];
 	private final float[] mViewMatrix = new float[16];
-	private final float[] mRotationMatrix = new float[16];
+	private final float[] mScaleMatrix = new float[16];
 	private final float[] mModelMatrix = new float[16];
 
 	private float mAngle;
 	private float[] f = { 0, 0 };
+	private float scale, maxScale;
 
 	@Override
 	public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -43,6 +44,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		// Set the background frame color
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		Matrix.setIdentityM(mModelMatrix, 0);
+		Matrix.setIdentityM(mScaleMatrix, 0);
 
 		mTriangle = new Triangle();
 		mSquare = new Square();
@@ -50,35 +52,49 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 	@Override
 	public void onDrawFrame(GL10 unused) {
-		float[] scratch = new float[16];
+		float[] scratchTriangle = new float[16];
+		float[] scratchSquare = new float[16];
 
 		Matrix.setIdentityM(mModelMatrix, 0);
+		Matrix.setIdentityM(mScaleMatrix, 0);
 		// Draw background color
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
+		
 		// Set the camera position (View matrix)
 		Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
 		// Calculate the projection and view transformation
 		Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
-		// Draw square
-		mSquare.draw(mMVPMatrix);
+		//draw max square
+		Matrix.scaleM(mScaleMatrix, 0, maxScale, maxScale, maxScale);
+		System.out.println(maxScale);
+		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
+		mSquare.setColorRed();
+		mSquare.draw(scratchSquare);
+		
+		Matrix.setIdentityM(mScaleMatrix, 0);
+		
+		// Draw average square		
+		Matrix.scaleM(mScaleMatrix, 0, scale, scale, scale);
+		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
+		mSquare.setColorBlue();
+		mSquare.draw(scratchSquare);
+		
+		
 
 		// Create a rotation for the triangle
 		Matrix.translateM(mModelMatrix, 0, f[0] / 10f, -f[1] / 10f, 0);
-		Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
 		mTriangle.setTriangleCoords(f);
 
 		
 		// Combine the rotation matrix with the projection and camera view
 		// Note that the mMVPMatrix factor *must be first* in order
-		// for the matrix multiplication product to be correct.
-		Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
-		Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mModelMatrix, 0);
+		// for the matrix multiplication product to be correct.		
+		Matrix.multiplyMM(scratchTriangle, 0, mMVPMatrix, 0, mModelMatrix, 0);
 
 		// Draw triangle
-		mTriangle.draw(scratch);
+		mTriangle.draw(scratchTriangle);
 	}
 
 	@Override
@@ -160,7 +176,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		mAngle = angle;
 	}
 
-	public void setPosition(float[] f) {
+	public void setTrianglePosition(float[] f) {
 		if (f[0] == 0 && f[1] == 0) {
 			if (this.f[0] > LIMIT && this.f[0] < -LIMIT && this.f[1] > LIMIT && this.f[1] < -LIMIT) {
 				if (this.f[0] > 0) {
@@ -179,6 +195,15 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 			}
 		}
 		this.f = f;
+	}
+	
+	public void setSquareScale(double scale){
+		this.scale = (float)scale;
+	}
+
+	public void setMaxSquareScale(double scale) {
+		this.maxScale = (float)scale;
+		
 	}
 
 }

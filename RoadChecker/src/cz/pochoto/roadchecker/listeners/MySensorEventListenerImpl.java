@@ -1,5 +1,6 @@
 package cz.pochoto.roadchecker.listeners;
 
+import cz.pochoto.roadchecker.utils.SensorUtils;
 import cz.pochoto.roadchecker.views.MyGLSurfaceView;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 public class MySensorEventListenerImpl implements MySensorEventListener {
 	private TextView accelerometerLabel, gyroscopeLabel;
 	private MyGLSurfaceView glSurfaceView;
+	private SensorUtils sensorUtils = new SensorUtils();
 	
 	float[] stableR = null;
 	int calibrated = 0;
@@ -95,16 +97,26 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 				Matrix.multiplyMV(result, 0, mRotaceY, 0, pom, 0);
 				float u = result[0];
 				float v = result[1];
-				System.out.println(u+"/"+v+"/"+result[2]);
-
+				//System.out.println(u+"/"+v+"/"+result[2]);
+			
+				sensorUtils.findDisplacements();
+				
 				if (glSurfaceView != null) {
-					glSurfaceView.setPosition(new float[] { u, v });
+					glSurfaceView.setTrianglePosition(new float[] { u, v });
+					glSurfaceView.setSquareScale(sensorUtils.computeAverage(u, v));
+					glSurfaceView.setMaxSquareScale(sensorUtils.findDisplacements());
+					glSurfaceView.render();
 				}
+				
+				
+				
 			}			
-			showResults();		
+			showResults();			
 
 		}
 	}
+
+
 
 	private double getVectorLenght(float[] f) {
 		if (f.length > 3) {
@@ -164,7 +176,7 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 		stableR = currentR.clone();
 		stableG = currentG.clone();
 		if (glSurfaceView != null) {
-			glSurfaceView.setPosition(new float[2]);
+			glSurfaceView.setTrianglePosition(new float[2]);
 		}
 		
 	}
