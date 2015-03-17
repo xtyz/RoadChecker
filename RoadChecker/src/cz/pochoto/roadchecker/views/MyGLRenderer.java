@@ -45,7 +45,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		Matrix.setIdentityM(mModelMatrix, 0);
 		Matrix.setIdentityM(mScaleMatrix, 0);
-
 		mTriangle = new Triangle();
 		mSquare = new Square();
 	}
@@ -67,8 +66,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
 		//draw max square
-		Matrix.scaleM(mScaleMatrix, 0, maxScale, maxScale, maxScale);
-		System.out.println(maxScale);
+		Matrix.scaleM(mScaleMatrix, 0, maxScale, maxScale, maxScale);		
 		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
 		mSquare.setColorRed();
 		mSquare.draw(scratchSquare);
