@@ -95,7 +95,7 @@ public class SensorUtils {
 	}
 
 	public double findDisplacements() {
-		return currentAcc/2;
+		return currentAcc/4;
 	}
 
 	private byte getTimer() {
