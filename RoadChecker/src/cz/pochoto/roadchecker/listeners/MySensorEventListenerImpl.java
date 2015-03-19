@@ -99,7 +99,7 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 				float v = result[1];
 				//System.out.println(u+"/"+v+"/"+result[2]);
 			
-				double average = sensorUtils.computeAverage(u, v);
+				double average = sensorUtils.compute(u, v);
 				if (glSurfaceView != null) {
 					glSurfaceView.setTrianglePosition(new float[] { u, v });
 					glSurfaceView.setSquareScale(average);
