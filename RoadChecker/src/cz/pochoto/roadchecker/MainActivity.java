@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -34,9 +35,9 @@ import com.google.android.gms.location.LocationServices;
 import cz.pochoto.roadchecker.handlers.GLSurfaceHandler;
 import cz.pochoto.roadchecker.handlers.MapHandler;
 import cz.pochoto.roadchecker.listeners.MyLocationChangeListenerImpl;
+import cz.pochoto.roadchecker.listeners.MySeekBarListener;
 import cz.pochoto.roadchecker.listeners.MySensorEventListener;
 import cz.pochoto.roadchecker.listeners.MySensorEventListenerImpl;
-import cz.pochoto.roadchecker.utils.LowPassFilter;
 import cz.pochoto.roadchecker.views.MyGLSurfaceView;
 
 @SuppressWarnings("deprecation")
@@ -63,6 +64,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	public static MyLocationChangeListenerImpl mLocationChangeListener;
 
 	public static TextView accelerometerLabel, gyroscopeLabel;
+	public static Button calibrateM, calibrateG;
+	public static SeekBar barM, barG;
 	public static int count = 50;
 	
 	
@@ -110,6 +113,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setBackgroundColor(Color.GRAY);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
+		
+		
 
 		// When swiping between different sections, select the corresponding
 		// tab. We can also use ActionBar.Tab#select() to do this if we have
@@ -266,6 +271,16 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	public void onLocationChanged(Location loc) {
 
 	}
+	
+	public void rec(View view){
+		//TODO
+	}
+	
+	public void calibrate(View view){
+		if(mSensorEventListener != null){
+			mSensorEventListener.calibrate();
+		}		
+	}
 
 	// fragments
 
@@ -299,30 +314,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 			accelerometerLabel = (TextView) rootView
 					.findViewById(R.id.accelerometer);
 			gyroscopeLabel = (TextView) rootView.findViewById(R.id.gyroscope);
-			SeekBar bar = (SeekBar)rootView.findViewById(R.id.seekAlpha);
-			bar.setProgress(1000);
-			bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-				
-				@Override
-				public void onStopTrackingTouch(SeekBar seekBar) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public void onStartTrackingTouch(SeekBar seekBar) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public void onProgressChanged(SeekBar seekBar, int progress,
-						boolean fromUser) {
-					LowPassFilter.ALPHA = progress / 1000f;
-					System.out.println(LowPassFilter.ALPHA);
-					
-				}
-			});
+			if(barM == null){
+				barM = (SeekBar)rootView.findViewById(R.id.seekAlpha);
+				barM.setProgress(1000);
+				barM.setOnSeekBarChangeListener(new MySeekBarListener("M"));
+			}			
 			mSensorEventListener.setAccelerometerLabel(accelerometerLabel);
 			mSensorEventListener.setGyroscopeLabel(gyroscopeLabel);
 			
@@ -407,7 +403,12 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			
+			View rootView = glSurfaceHandler.getRootView(inflater, container);
+			if(barG == null){
+				barG = (SeekBar)rootView.findViewById(R.id.seekAlpha);
+				barG.setProgress(barM.getProgress());
+				barG.setOnSeekBarChangeListener(new MySeekBarListener("G"));
+			}			
 			return glSurfaceHandler.getRootView(inflater, container);
 		}
 		

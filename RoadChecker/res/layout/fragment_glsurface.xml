@@ -30,4 +30,36 @@
         android:layout_alignRight="@+id/gl_surface_view"
         android:layout_alignTop="@+id/gl_surface_view" />
 
+    <SeekBar
+        android:id="@+id/seekAlpha"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/gl_surface_view"
+        android:layout_alignLeft="@+id/gl_surface_view"
+        android:layout_alignRight="@+id/gl_surface_view"
+        android:layout_alignStart="@+id/gl_surface_view"
+        android:layout_alignEnd="@+id/gl_surface_view"
+        android:max="1000" />
+
+    <Button
+        android:id="@+id/button_calibrate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/seekAlpha"
+        android:layout_alignLeft="@+id/gl_surface_view"
+        android:layout_alignStart="@+id/gl_surface_view"
+        android:onClick="calibrate"
+        android:text="@string/btn_calibrate" />
+
+    <Button
+        android:id="@+id/rec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/seekAlpha"
+        android:layout_alignEnd="@+id/gl_surface_view"
+        android:layout_alignRight="@+id/gl_surface_view"
+        android:onClick="rec"
+        android:text="@string/btn_rec"
+        android:textColorLink="#ff0000" />
+
 </RelativeLayout>

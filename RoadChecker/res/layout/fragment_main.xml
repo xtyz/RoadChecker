@@ -37,6 +37,27 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:max="1000" />
+
+    <Button
+        android:id="@+id/button_calibrate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/seekAlpha"
+        android:layout_alignLeft="@+id/seekAlpha"
+        android:layout_alignStart="@+id/seekAlpha"
+        android:text="@string/btn_calibrate" android:onClick="calibrate"/>
+
+    <Button
+        android:id="@+id/rec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/seekAlpha"
+        android:layout_alignEnd="@+id/seekAlpha"
+        android:layout_alignRight="@+id/seekAlpha"
+        android:onClick="rec"
+        android:text="@string/btn_rec"
+        android:textColorLink="#ff0000" />
 
 </RelativeLayout>
