@@ -1,5 +1,6 @@
 package cz.pochoto.roadchecker.listeners;
 
+import cz.pochoto.roadchecker.utils.LowPassFilter;
 import cz.pochoto.roadchecker.utils.SensorUtils;
 import cz.pochoto.roadchecker.views.MyGLSurfaceView;
 import android.hardware.Sensor;
@@ -13,21 +14,24 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 	private MyGLSurfaceView glSurfaceView;
 	private SensorUtils sensorUtils = new SensorUtils();
 	
-	float[] stableR = null;
-	int calibrated = 0;
-	float[] currentR0 = new float[16];
-	float[] currentR = new float[16];
-	float[] inclination = new float[16];
-	float[] stableG = null;
-	float[] currentG = new float[16];
-	float[] accelerationG = new float[16];
-	float[] geomag = new float[3];
-	float[] orientVals = new float[3];
-	double stableGValue, currentGValue, accelerationGValue;
+	private float[] stableR = null;
+	private int calibrated = 0;
+	private float[] currentR0 = new float[16];
+	private float[] currentR = new float[16];
+	private float[] inclination = new float[16];
+	private float[] stableG = new float[3];
+	private float[] oldG = new float[3];
+	private float[] currentG = new float[3];	
+	private float[] accelerationG = new float[3];
+	private float[] geomag = new float[3];
+	private float[] orientVals = new float[3];
+	private float[] angleChange = new float[3];
+	private double stableGValue, currentGValue, accelerationGValue;
 
 	final float pi = (float) Math.PI;
 	final float rad2deg = 180 / pi;
-	private float[] angleChange = new float[3];
+
+	
 	public static String endl = "\n";
 
 	@Override
@@ -43,6 +47,8 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 			break;
 		}
 
+		currentG = LowPassFilter.filter(currentG, oldG).clone();		
+		oldG = currentG.clone();
 		// pokud je nalezena rotacni matice - pravdepodobne nebude treba bude se
 		// rotovat ze souèasného Z na Z 0,0,9
 
@@ -51,7 +57,6 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 			
 			// prvni spusteni
 			if (stableR == null || stableG == null) {
-				calibrate();
 				calibration();
 			}
 			
@@ -64,19 +69,10 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 
 			currentGValue = getVectorLenght(currentG);
 			stableGValue = getVectorLenght(stableG);
-			accelerationGValue = Math.abs(currentGValue - stableGValue);
-			
-					
+			accelerationGValue = Math.abs(currentGValue - stableGValue);					
 			
 			// kdyz neni rozdil prilis velky, kalibruj jinak znazorni zrychleni
-			if ((accelerationGValue < 0.2 && accelerationGValue > -0.2)
-						&& (currentGValue > 9.6 && currentGValue < 9.9)) {
-				
-				//kalibrace			
-				calibration();				
-				
-			} else {
-													
+																
 				//otoceni accelerationG o  minus orientvals (nejprve po x a pak po y) - promitnuti do 2d xy - ax a ay se budou dat promitnout
 				//kolem z ne - magnetometr
 				float[] mRotaceX = new float[]{1,0,0,0,
@@ -101,7 +97,7 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 			
 				double average = sensorUtils.compute(u, v);
 				if (glSurfaceView != null) {
-					glSurfaceView.setTrianglePosition(new float[] { u, v });
+					glSurfaceView.setTrianglePosition(new float[] { u, v,  result[2]});
 					glSurfaceView.setSquareScale(average);
 					glSurfaceView.setMaxSquareScale(sensorUtils.findDisplacements());
 					glSurfaceView.render();
@@ -109,7 +105,7 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 				
 				
 				
-			}			
+						
 			showResults();			
 
 		}
@@ -131,9 +127,10 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 	}
 	
 	private void showResults(){
-		String accLabel = "Akcelerometr:"+endl+"Celkové g:" + currentGValue + endl+"x: "
+		String accLabel = "Akcelerometr:"+endl+"C: " + currentGValue + endl+"x: "
 				+ currentG[0] + endl+"y: " + currentG[1] + endl+"z: "
-				+ currentG[2] + endl+"Akcelerace: "+endl+"Celková: "
+				+ currentG[2] + endl+
+				"Akcelerace: "+endl+"C: "
 				+ accelerationGValue + endl+"x: "
 				+ accelerationG[0] + endl+"y: " + accelerationG[1] + endl+"z: "
 				+ accelerationG[2];		
@@ -169,30 +166,19 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 		
 	}
 	
-	private void calibration(){
+	public void calibration(){
 		//natoceni os souradnic
 		//normalni - display nahore			
 		stableR = currentR.clone();
 		stableG = currentG.clone();
 		if (glSurfaceView != null) {
-			glSurfaceView.setTrianglePosition(new float[2]);
+			glSurfaceView.setTrianglePosition(new float[3]);
 		}
 		
 	}
 	
 	public void calibrate(){
-		if(currentG[1] > 7){
-			//tlacitka dole
-			calibrated = 1;
-		}else if(currentG[0] > 7){
-			//tlacitka v pravo
-			calibrated = 2;
-		}else if(currentG[0] < -7){
-			// tlacitka v levo
-			calibrated = 3;
-		}else if (currentG[2] > 7){
-			calibrated = 0;
-		}
+		calibration();
 	}
 	
 	@SuppressWarnings("unused")

@@ -41,6 +41,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceCreated(GL10 unused, EGLConfig config) {
 
+		GLES20.glEnable(GLES20.GL_BLEND);
+		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		// Set the background frame color
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		Matrix.setIdentityM(mModelMatrix, 0);
@@ -82,7 +84,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		
 
 		// Create a rotation for the triangle
-		Matrix.translateM(mModelMatrix, 0, f[0] / 10f, -f[1] / 10f, 0);
+		Matrix.translateM(mModelMatrix, 0, f[0] / 10f, -f[1] / 10f, f[2] / 10f);
 		mTriangle.setTriangleCoords(f);
 
 		

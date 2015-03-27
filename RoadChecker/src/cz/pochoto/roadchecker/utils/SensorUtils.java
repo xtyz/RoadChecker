@@ -54,8 +54,8 @@ public class SensorUtils {
 		finalMean = computeAverage(timer, mean1, mean2, mean3, mean4);
 		finalDeviation = computeAverage(timer, st1, st2, st3, st4);
 
-		System.out.println(timer+" - "+finalMean);
-		System.out.println(finalDeviation);
+//		System.out.println(timer+" - "+finalMean);
+//		System.out.println(finalDeviation);
 
 		resoleveDisplacements(currentAcc, finalMean, finalDeviation);
 		
@@ -87,7 +87,7 @@ public class SensorUtils {
 		}
 		
 		if(!displacements.isEmpty()){			
-			System.out.println("Displacements - "+displacements.size());
+//			System.out.println("Displacements - "+displacements.size());
 			if(displacements.size() > 500){
 				displacements.clear();
 			}
@@ -100,7 +100,7 @@ public class SensorUtils {
 
 	private byte getTimer() {
 		long currentTime = System.currentTimeMillis() % timeline;
-		System.out.println(currentTime);
+//		System.out.println(currentTime);
 		byte timer = 1;
 
 		if (currentTime > 0) {
@@ -124,22 +124,18 @@ public class SensorUtils {
 			if (timer == 2 && oldTimer == 1) {
 				mean2.reset();
 				st2.reset();
-				System.out.println("Reset mean2");
 			}
 			if (timer == 3 && oldTimer == 2) {
 				mean3.reset();
 				st3.reset();
-				System.out.println("Reset mean3");
 			}
 			if (timer == 4 && oldTimer == 3) {
 				mean4.reset();
 				st4.reset();
-				System.out.println("Reset mean4");
 			}
 			if (timer == 1 && oldTimer == 4) {
 				mean1.reset();
 				st2.reset();
-				System.out.println("Reset mean1");
 			}
 		}
 	}

@@ -98,8 +98,8 @@ int drawable ic_plusone_tall_off_client 0x7f02001e
 int drawable powered_by_google_dark 0x7f02001f
 int drawable powered_by_google_light 0x7f020020
 int id accelerometer 0x7f0b001a
-int id action_calibrate 0x7f0b001e
-int id action_settings 0x7f0b001d
+int id action_calibrate 0x7f0b001f
+int id action_settings 0x7f0b001e
 int id adjust_height 0x7f0b0000
 int id adjust_width 0x7f0b0001
 int id book_now 0x7f0b0010
@@ -115,7 +115,7 @@ int id gyroscope 0x7f0b001b
 int id holo_dark 0x7f0b0007
 int id holo_light 0x7f0b0008
 int id hybrid 0x7f0b0003
-int id location_map 0x7f0b001c
+int id location_map 0x7f0b001d
 int id match_parent 0x7f0b000e
 int id monochrome 0x7f0b0016
 int id none 0x7f0b0002
@@ -124,6 +124,7 @@ int id pager 0x7f0b0017
 int id production 0x7f0b0009
 int id sandbox 0x7f0b000a
 int id satellite 0x7f0b0005
+int id seekAlpha 0x7f0b001c
 int id selectionDetails 0x7f0b000d
 int id strict_sandbox 0x7f0b000b
 int id terrain 0x7f0b0006

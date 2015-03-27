@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -35,6 +36,7 @@ import cz.pochoto.roadchecker.handlers.MapHandler;
 import cz.pochoto.roadchecker.listeners.MyLocationChangeListenerImpl;
 import cz.pochoto.roadchecker.listeners.MySensorEventListener;
 import cz.pochoto.roadchecker.listeners.MySensorEventListenerImpl;
+import cz.pochoto.roadchecker.utils.LowPassFilter;
 import cz.pochoto.roadchecker.views.MyGLSurfaceView;
 
 @SuppressWarnings("deprecation")
@@ -133,7 +135,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 						
 			sensorManager.registerListener(mSensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
 					SensorManager.SENSOR_DELAY_UI);
-		}		
+		}
 		if (sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null) {
 			
 			sensorManager.registerListener(mSensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
@@ -297,7 +299,30 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 			accelerometerLabel = (TextView) rootView
 					.findViewById(R.id.accelerometer);
 			gyroscopeLabel = (TextView) rootView.findViewById(R.id.gyroscope);
-			
+			SeekBar bar = (SeekBar)rootView.findViewById(R.id.seekAlpha);
+			bar.setProgress(1000);
+			bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+				
+				@Override
+				public void onStopTrackingTouch(SeekBar seekBar) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress,
+						boolean fromUser) {
+					LowPassFilter.ALPHA = progress / 1000f;
+					System.out.println(LowPassFilter.ALPHA);
+					
+				}
+			});
 			mSensorEventListener.setAccelerometerLabel(accelerometerLabel);
 			mSensorEventListener.setGyroscopeLabel(gyroscopeLabel);
 			
