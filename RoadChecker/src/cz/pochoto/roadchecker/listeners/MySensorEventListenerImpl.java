@@ -1,5 +1,6 @@
 package cz.pochoto.roadchecker.listeners;
 
+import cz.pochoto.roadchecker.MainActivity;
 import cz.pochoto.roadchecker.opengl.MyGLSurfaceView;
 import cz.pochoto.roadchecker.utils.LowPassFilter;
 import cz.pochoto.roadchecker.utils.SensorUtils;
@@ -16,7 +17,7 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 	
 	private float[] stableR = null;
 	private boolean recording = false;
-	private int calibrated = 0;
+	private int calibrated = 0, records = 0;
 	private float[] currentR0 = new float[16];
 	private float[] currentR = new float[16];
 	private float[] inclination = new float[16];
@@ -104,6 +105,11 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 				glSurfaceView.setMaxSquareScale(sensorUtils.findDisplacements());
 				glSurfaceView.render();
 			}
+			
+			if(recording){
+				// vel xy;vel xy c; xy prumer c; z; z c; zprumer c
+				MainActivity.recordUtils.addValue(getVectorLenght(new float[]{accelerationG[0],accelerationG[1]})+";"+getVectorLenght(new float[]{result[0],result[1]})+";"+average+";"+accelerationG[2]+";"+result[2]+";"+averageZ);
+			}
 									
 			showResults();			
 		}
@@ -185,8 +191,11 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 	@Override
 	public boolean record() {
 		if(recording){
-			recording = false;
+			MainActivity.recordUtils.stopRecord();
+			recording = false;			
 		}else{
+			MainActivity.recordUtils.startRecord("_"+(records++));
+			MainActivity.recordUtils.addValue("velikost xy;velikost xy (kalibrováno);xy prùmìr (kalibrováno);velikost z;velikost z (kalibrováno); z prùmìr (kalibrováno)");
 			recording = true;
 		}
 		return recording;

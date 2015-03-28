@@ -39,6 +39,7 @@ import cz.pochoto.roadchecker.listeners.MySeekBarListener;
 import cz.pochoto.roadchecker.listeners.MySensorEventListener;
 import cz.pochoto.roadchecker.listeners.MySensorEventListenerImpl;
 import cz.pochoto.roadchecker.opengl.MyGLSurfaceView;
+import cz.pochoto.roadchecker.utils.RecordUtils;
 
 @SuppressWarnings("deprecation")
 public class MainActivity extends Activity implements ActionBar.TabListener,
@@ -62,6 +63,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	
 	public static MySensorEventListener mSensorEventListener;
 	public static MyLocationChangeListenerImpl mLocationChangeListener;
+	
+	public static RecordUtils recordUtils;
 
 	public static TextView accelerometerLabel, gyroscopeLabel;
 	public static Button calibrateM, calibrateG;
@@ -85,7 +88,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		setContentView(R.layout.activity_main);
 		buildGoogleApiClient();
 		
-		// init resources
+		// init resources		
+		recordUtils = new RecordUtils(getApplicationContext());		
+		
 		mSensorEventListener = new MySensorEventListenerImpl();
 		mLocationChangeListener = new MyLocationChangeListenerImpl();
 		
@@ -96,10 +101,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		mapHandler.setLocationChangeListener(mLocationChangeListener);
 		
 		glSurfaceHandler = new GLSurfaceHandler();
-		glSurfaceHandler.setSensorEventListener(mSensorEventListener);
-		
-		
-		
+		glSurfaceHandler.setSensorEventListener(mSensorEventListener);		
 		
 		fragmentManager = getFragmentManager();
 
@@ -273,7 +275,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	}
 	
 	public void rec(View view){
-		//TODO
+		if(mSensorEventListener != null){
+			mSensorEventListener.record();
+		}	
 	}
 	
 	public void calibrate(View view){
