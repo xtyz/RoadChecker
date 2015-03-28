@@ -19,7 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import cz.pochoto.roadchecker.views.MyGLRenderer;
+import cz.pochoto.roadchecker.opengl.MyGLRenderer;
 import android.opengl.GLES20;
 
 /**

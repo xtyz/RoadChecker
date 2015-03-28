@@ -1,4 +1,4 @@
-package cz.pochoto.roadchecker.views;
+package cz.pochoto.roadchecker.opengl;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -37,6 +37,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	private float mAngle;
 	private float[] f = { 0, 0 };
 	private float scale, maxScale;
+	private float averageZ;
 
 	@Override
 	public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -79,21 +80,37 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		Matrix.scaleM(mScaleMatrix, 0, scale, scale, scale);
 		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
 		mSquare.setColorBlue();
+		mSquare.draw(scratchSquare);		
+
+		
+		Matrix.setIdentityM(mScaleMatrix, 0);
+		
+		// Draw currentZ square		
+		Matrix.scaleM(mScaleMatrix, 0, 0.2f, f[2], 0f);
+		Matrix.translateM(mScaleMatrix, 0, -5f, 0, 0);
+		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
+		mSquare.setColorRed();
+		mSquare.draw(scratchSquare);
+		
+		Matrix.setIdentityM(mScaleMatrix, 0);
+		
+		// Draw averageZ square		
+		Matrix.scaleM(mScaleMatrix, 0, 0.2f, averageZ, 0f);
+		Matrix.translateM(mScaleMatrix, 0, -5f, 0, 0);
+		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
+		mSquare.setColorBlue();
 		mSquare.draw(scratchSquare);
 		
 		
 
 		// Create a rotation for the triangle
 		Matrix.translateM(mModelMatrix, 0, f[0] / 10f, -f[1] / 10f, f[2] / 10f);
-		mTriangle.setTriangleCoords(f);
-
-		
+		mTriangle.setTriangleCoords(f);		
 		// Combine the rotation matrix with the projection and camera view
 		// Note that the mMVPMatrix factor *must be first* in order
 		// for the matrix multiplication product to be correct.		
 		Matrix.multiplyMM(scratchTriangle, 0, mMVPMatrix, 0, mModelMatrix, 0);
 
-		// Draw triangle
 		mTriangle.draw(scratchTriangle);
 	}
 
@@ -204,6 +221,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	public void setMaxSquareScale(double scale) {
 		this.maxScale = (float)scale;
 		
+	}
+
+	public void setAvgZSquareScale(double averageZ) {
+		this.averageZ = (float)averageZ;		
 	}
 
 }

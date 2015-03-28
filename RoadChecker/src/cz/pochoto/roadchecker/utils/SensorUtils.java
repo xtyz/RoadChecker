@@ -30,7 +30,7 @@ public class SensorUtils {
 		st4 = new StandardDeviation();
 	}
 
-	public double compute(float u, float v) {
+	public double compute(double value) {
 		double finalMean = 0;
 		double finalDeviation = 0;
 
@@ -39,7 +39,7 @@ public class SensorUtils {
 		resetMeans(timer, this.timer);
 		this.timer = timer;
 
-		currentAcc = Math.sqrt(u * u + v * v);
+		currentAcc = value;
 		// add new
 		mean1.addValue(currentAcc);
 		mean2.addValue(currentAcc);
@@ -53,9 +53,6 @@ public class SensorUtils {
 		// compute average
 		finalMean = computeAverage(timer, mean1, mean2, mean3, mean4);
 		finalDeviation = computeAverage(timer, st1, st2, st3, st4);
-
-//		System.out.println(timer+" - "+finalMean);
-//		System.out.println(finalDeviation);
 
 		resoleveDisplacements(currentAcc, finalMean, finalDeviation);
 		
@@ -100,7 +97,6 @@ public class SensorUtils {
 
 	private byte getTimer() {
 		long currentTime = System.currentTimeMillis() % timeline;
-//		System.out.println(currentTime);
 		byte timer = 1;
 
 		if (currentTime > 0) {

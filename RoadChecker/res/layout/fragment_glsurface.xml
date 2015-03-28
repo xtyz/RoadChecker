@@ -9,7 +9,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="cz.pochoto.roadchecker.MainActivity$GLSurfaceFragment" >
 
-    <cz.pochoto.roadchecker.views.MyGLSurfaceView
+    <cz.pochoto.roadchecker.opengl.MyGLSurfaceView
         android:id="@+id/gl_surface_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

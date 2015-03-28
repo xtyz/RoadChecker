@@ -1,4 +1,4 @@
-package cz.pochoto.roadchecker.views;
+package cz.pochoto.roadchecker.opengl;
 
 import cz.pochoto.roadchecker.listeners.MySensorEventListener;
 import android.annotation.SuppressLint;
@@ -114,6 +114,11 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
 	public void setMaxSquareScale(double scale) {
 		this.mRenderer.setMaxSquareScale(scale);		
+	}
+
+	public void setAvgZSquareScale(double averageZ) {
+		this.mRenderer.setAvgZSquareScale(averageZ);
+		
 	}
 
 }

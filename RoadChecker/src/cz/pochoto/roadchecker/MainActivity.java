@@ -38,7 +38,7 @@ import cz.pochoto.roadchecker.listeners.MyLocationChangeListenerImpl;
 import cz.pochoto.roadchecker.listeners.MySeekBarListener;
 import cz.pochoto.roadchecker.listeners.MySensorEventListener;
 import cz.pochoto.roadchecker.listeners.MySensorEventListenerImpl;
-import cz.pochoto.roadchecker.views.MyGLSurfaceView;
+import cz.pochoto.roadchecker.opengl.MyGLSurfaceView;
 
 @SuppressWarnings("deprecation")
 public class MainActivity extends Activity implements ActionBar.TabListener,

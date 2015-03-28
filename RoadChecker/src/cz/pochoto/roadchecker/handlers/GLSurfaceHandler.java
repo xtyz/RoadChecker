@@ -8,7 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import cz.pochoto.roadchecker.R;
 import cz.pochoto.roadchecker.listeners.MySensorEventListener;
-import cz.pochoto.roadchecker.views.MyGLSurfaceView;
+import cz.pochoto.roadchecker.opengl.MyGLSurfaceView;
 
 public class GLSurfaceHandler extends AbstractHandler{
 	

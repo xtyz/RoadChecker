@@ -1,8 +1,8 @@
 package cz.pochoto.roadchecker.listeners;
 
+import cz.pochoto.roadchecker.opengl.MyGLSurfaceView;
 import cz.pochoto.roadchecker.utils.LowPassFilter;
 import cz.pochoto.roadchecker.utils.SensorUtils;
-import cz.pochoto.roadchecker.views.MyGLSurfaceView;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
@@ -15,6 +15,7 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 	private SensorUtils sensorUtils = new SensorUtils();
 	
 	private float[] stableR = null;
+	private boolean recording = false;
 	private int calibrated = 0;
 	private float[] currentR0 = new float[16];
 	private float[] currentR = new float[16];
@@ -75,49 +76,49 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 																
 				//otoceni accelerationG o  minus orientvals (nejprve po x a pak po y) - promitnuti do 2d xy - ax a ay se budou dat promitnout
 				//kolem z ne - magnetometr
-				float[] mRotaceX = new float[]{1,0,0,0,
-												0,(float)Math.cos(-orientVals[1]),-(float)Math.sin(-orientVals[1]),0,
-												0,(float)Math.sin(-orientVals[1]),(float)Math.cos(-orientVals[1]),0,
-												0,0,0,1};
+			float[] mRotaceX = new float[]{1,0,0,0,
+											0,(float)Math.cos(-orientVals[1]),-(float)Math.sin(-orientVals[1]),0,
+											0,(float)Math.sin(-orientVals[1]),(float)Math.cos(-orientVals[1]),0,
+											0,0,0,1};
 				
-				float[] mRotaceY = new float[]{(float)Math.cos(-orientVals[2]),0,(float)Math.sin(-orientVals[2]),0,
-												0,1,0,0,													
-												-(float)Math.sin(-orientVals[2]),0,(float)Math.cos(-orientVals[2]),0,
-												0,0,0,1};
-					
-				float[] pom = new float[4];
-				float[] result = new float[4];
+			float[] mRotaceY = new float[]{(float)Math.cos(-orientVals[2]),0,(float)Math.sin(-orientVals[2]),0,
+											0,1,0,0,													
+											-(float)Math.sin(-orientVals[2]),0,(float)Math.cos(-orientVals[2]),0,
+											0,0,0,1};
 				
-				
-				Matrix.multiplyMV(pom, 0, mRotaceX, 0, new float[]{accelerationG[0],accelerationG[1],accelerationG[2],1}, 0);
-				Matrix.multiplyMV(result, 0, mRotaceY, 0, pom, 0);
-				float u = result[0];
-				float v = result[1];
-				//System.out.println(u+"/"+v+"/"+result[2]);
+			float[] pom = new float[4];
+			float[] result = new float[4];
 			
-				double average = sensorUtils.compute(u, v);
-				if (glSurfaceView != null) {
-					glSurfaceView.setTrianglePosition(new float[] { u, v,  result[2]});
-					glSurfaceView.setSquareScale(average);
-					glSurfaceView.setMaxSquareScale(sensorUtils.findDisplacements());
-					glSurfaceView.render();
-				}
+			
+			Matrix.multiplyMV(pom, 0, mRotaceX, 0, new float[]{accelerationG[0],accelerationG[1],accelerationG[2],1}, 0);
+			Matrix.multiplyMV(result, 0, mRotaceY, 0, pom, 0);
+							
+			double average = sensorUtils.compute(getVectorLenght(new float[]{result[0],result[1]}));
 				
+			double averageZ = sensorUtils.compute(result[2]);
 				
-				
-						
+			if (glSurfaceView != null) {
+				glSurfaceView.setTrianglePosition(new float[] { result[0], result[1], result[2]});
+				glSurfaceView.setSquareScale(average);
+				glSurfaceView.setAvgZSquareScale(averageZ);
+				glSurfaceView.setMaxSquareScale(sensorUtils.findDisplacements());
+				glSurfaceView.render();
+			}
+									
 			showResults();			
-
 		}
 	}
 
 
 
 	private double getVectorLenght(float[] f) {
-		if (f.length > 3) {
-			return 0;
+		if (f.length == 3) {
+			return Math.sqrt(f[0] * f[0] + f[1] * f[1] + f[2] * f[2]);
 		}
-		return Math.sqrt(f[0] * f[0] + f[1] * f[1] + f[2] * f[2]);
+		if (f.length == 2){
+			return Math.sqrt(f[0] * f[0] + f[1] * f[1]);
+		}
+		return 0;
 	}
 
 	@Override
@@ -180,6 +181,16 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 	public void calibrate(){
 		calibration();
 	}
+	
+	@Override
+	public boolean record() {
+		if(recording){
+			recording = false;
+		}else{
+			recording = true;
+		}
+		return recording;
+	}	
 	
 	@SuppressWarnings("unused")
 	private void convertToCalibrationValues(){
