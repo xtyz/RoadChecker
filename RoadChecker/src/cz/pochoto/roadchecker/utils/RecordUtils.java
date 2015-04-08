@@ -6,12 +6,13 @@ import java.io.FileOutputStream;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Environment;
+import android.widget.Toast;
 
 public class RecordUtils {
 
 	private Context context;
 	
-	String fileName = "RoadChecker";
+	String fileName;
 	StringBuilder stringBuilder;
 
 	public RecordUtils(Context context) {
@@ -19,7 +20,8 @@ public class RecordUtils {
 	}
 	
 	public void startRecord(String fileName){
-		this.fileName = this.fileName + fileName + ".txt";
+		this.fileName = "RoadChecker" + fileName + ".txt";
+		Toast.makeText(context, "Start recording "+this.fileName, Toast.LENGTH_LONG).show();
 		stringBuilder = new StringBuilder();
 		System.out.println("Recording started");
 	}
@@ -31,7 +33,8 @@ public class RecordUtils {
 	
 	public void stopRecord(){
 		saveFile();
-		System.out.println("Recording stoped, file saved at: "+context.getFilesDir());
+		System.out.println("Recording stoped, file saved as: "+this.fileName);
+		Toast.makeText(context, "Recording stoped, file saved as: "+this.fileName, Toast.LENGTH_LONG).show();
 	}
 	
 	@SuppressLint("WorldReadableFiles")

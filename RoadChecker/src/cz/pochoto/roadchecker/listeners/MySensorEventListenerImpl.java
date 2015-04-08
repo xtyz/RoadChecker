@@ -156,7 +156,8 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 				+ "Total inclination" + endl + "Azimuth: (z)"
 				+ orientVals[0] * rad2deg + endl + "Pitch: (x)"
 				+ orientVals[1] * rad2deg + endl + "Roll: (y)"
-				+ orientVals[2] * rad2deg + endl;
+				+ orientVals[2] * rad2deg + endl + endl
+				+"Low-Pass: "+LowPassFilter.ALPHA;
 		
 		
 		if (accelerometerLabel != null) {
