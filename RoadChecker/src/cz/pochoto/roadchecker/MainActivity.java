@@ -70,6 +70,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	public static Button calibrateM, calibrateG;
 	public static SeekBar barM, barG;
 	public static int count = 50;
+	public static float speed = 0;
 	
 	
 
@@ -96,7 +97,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		registerSensorListeners();
-
+		
 		mapHandler = new MapHandler();
 		mapHandler.setLocationChangeListener(mLocationChangeListener);
 		
@@ -104,6 +105,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		glSurfaceHandler.setSensorEventListener(mSensorEventListener);		
 		
 		fragmentManager = getFragmentManager();
+		
 
 		// Set up the action bar.
 		final ActionBar actionBar = getActionBar();
@@ -264,14 +266,14 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 	}
 
-	protected void startLocationUpdates() {
+	public void startLocationUpdates() {
 		LocationServices.FusedLocationApi.requestLocationUpdates(
 				mGoogleApiClient, mLocationRequest, this);
 	}
 
 	@Override
 	public void onLocationChanged(Location loc) {
-
+		speed = loc.getSpeed();
 	}
 	
 	public void rec(View view){
@@ -313,7 +315,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.fragment_main, container,
-					false);
+					false);			
 						
 			accelerometerLabel = (TextView) rootView
 					.findViewById(R.id.accelerometer);

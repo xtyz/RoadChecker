@@ -3,6 +3,8 @@ package cz.pochoto.roadchecker.utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.pochoto.roadchecker.MainActivity;
+
 public class SensorUtils {
 	private Mean mean1;
 	private Mean mean2;
@@ -12,10 +14,16 @@ public class SensorUtils {
 	private StandardDeviation st2;
 	private StandardDeviation st3;
 	private StandardDeviation st4;
-
+	
+	private double finalMean = 0;
+	private double finalDeviation = 0;
+	private double lastMaxDisplacement = 0;
 	private byte timer = 1;
-	private final int timeline = 20000;
+	private final int timeline = 10000;
 	private List<Double> displacements = new ArrayList<Double>();
+	
+	private float speed = 0;
+	private boolean displacementFound = false;
 	
 	double currentAcc;
 
@@ -30,10 +38,7 @@ public class SensorUtils {
 		st4 = new StandardDeviation();
 	}
 
-	public double compute(double value) {
-		double finalMean = 0;
-		double finalDeviation = 0;
-
+	public void compute(double value) {
 		// compute timer and reset neccessery
 		byte timer = getTimer();
 		resetMeans(timer, this.timer);
@@ -54,11 +59,17 @@ public class SensorUtils {
 		finalMean = computeAverage(timer, mean1, mean2, mean3, mean4);
 		finalDeviation = computeAverage(timer, st1, st2, st3, st4);
 
-		resoleveDisplacements(currentAcc, finalMean, finalDeviation);
-		
-		return finalMean;
+		resoleveDisplacements(currentAcc, finalMean, finalDeviation);		
 	}
 	
+	public double getFinalMean() {
+		return finalMean;
+	}
+
+	public double getFinalDeviation() {
+		return finalDeviation;
+	}
+
 	private double computeAverage(byte timer, AbstractCounter ac1, AbstractCounter ac2, AbstractCounter ac3, AbstractCounter ac4){
 		double result = 0;
 		switch (timer) {
@@ -79,20 +90,41 @@ public class SensorUtils {
 	}
 
 	private void resoleveDisplacements(double acc, double mean, double finalDeviation) {
-		if(acc + finalDeviation < mean || acc - finalDeviation > mean){
-			displacements.add(acc);
-		}
-		
-		if(!displacements.isEmpty()){			
-//			System.out.println("Displacements - "+displacements.size());
+		if(!displacements.isEmpty()){
 			if(displacements.size() > 500){
 				displacements.clear();
 			}
 		}
+		
+		if(acc > mean + 1){
+			if(!displacementFound){
+				displacementFound = true;
+			}
+			if(acc > lastMaxDisplacement){
+				lastMaxDisplacement = acc;
+			}
+			displacements.add(acc);
+		}else{
+			if(displacementFound){
+				displacementFound = false;
+				lastMaxDisplacement = 0;
+			}
+			displacements.add(0d);
+		}
 	}
 
-	public double findDisplacements() {
-		return currentAcc/4;
+	public double getDisplacement() {
+		if(displacements.isEmpty()){
+			return 0;
+		}
+		return displacements.get(displacements.size()-1);
+	}
+	
+	private float getSpeed(){
+		if(speed != MainActivity.speed){
+			speed = MainActivity.speed;
+		}
+		return speed;
 	}
 
 	private byte getTimer() {

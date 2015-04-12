@@ -13,7 +13,8 @@ import android.widget.TextView;
 public class MySensorEventListenerImpl implements MySensorEventListener {
 	private TextView accelerometerLabel, gyroscopeLabel;
 	private MyGLSurfaceView glSurfaceView;
-	private SensorUtils sensorUtils = new SensorUtils();
+	private SensorUtils xySensorUtils = new SensorUtils();
+	private SensorUtils zSensorUtils = new SensorUtils();
 	
 	private float[] stableR = null;
 	private boolean recording = false;
@@ -94,21 +95,26 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 			Matrix.multiplyMV(pom, 0, mRotaceX, 0, new float[]{accelerationG[0],accelerationG[1],accelerationG[2],1}, 0);
 			Matrix.multiplyMV(result, 0, mRotaceY, 0, pom, 0);
 							
-			double average = sensorUtils.compute(getVectorLenght(new float[]{result[0],result[1]}));
-				
-			double averageZ = sensorUtils.compute(result[2]);
+			
+			xySensorUtils.compute(getVectorLenght(new float[]{result[0],result[1]}));
+			zSensorUtils.compute(Math.abs(result[2]));
+			
+			double xyMean = xySensorUtils.getFinalMean();				
+			double zMean = zSensorUtils.getFinalMean();
+			double xyDeviation = xySensorUtils.getFinalDeviation();
+			double zDeviation = zSensorUtils.getFinalDeviation();
 				
 			if (glSurfaceView != null) {
 				glSurfaceView.setTrianglePosition(new float[] { result[0], result[1], result[2]});
-				glSurfaceView.setSquareScale(average);
-				glSurfaceView.setAvgZSquareScale(averageZ);
-				glSurfaceView.setMaxSquareScale(sensorUtils.findDisplacements());
+				glSurfaceView.setSquareScale(xyMean);
+				glSurfaceView.setAvgZSquareScale(zMean);
+				if(xySensorUtils.getDisplacement()!=0)glSurfaceView.setMaxSquareScale(xySensorUtils.getDisplacement());
 				glSurfaceView.render();
 			}
 			
 			if(recording){
-				// vel xy;vel xy c; xy prumer c; z; z c; zprumer c
-				MainActivity.recordUtils.addValue(getVectorLenght(new float[]{accelerationG[0],accelerationG[1]})+";"+getVectorLenght(new float[]{result[0],result[1]})+";"+average+";"+accelerationG[2]+";"+result[2]+";"+averageZ);
+				// velikost xy;velikost xy kaliblováno; xy prumer; xy odchylka; z; z kalibrováno; z prumer; mez; z odchylka; alfa; rychlost
+				MainActivity.recordUtils.addValue(getVectorLenght(new float[]{accelerationG[0],accelerationG[1]})+";"+getVectorLenght(new float[]{result[0],result[1]})+";"+xyMean+";"+xyDeviation+";"+Math.abs(accelerationG[2])+";"+Math.abs(result[2])+";"+zMean+";0.0;"+zSensorUtils.getDisplacement()+";"+zDeviation+";"+LowPassFilter.ALPHA+";"+MainActivity.speed);
 			}
 									
 			showResults();			
@@ -157,7 +163,8 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 				+ orientVals[0] * rad2deg + endl + "Pitch: (x)"
 				+ orientVals[1] * rad2deg + endl + "Roll: (y)"
 				+ orientVals[2] * rad2deg + endl + endl
-				+"Low-Pass: "+LowPassFilter.ALPHA;
+				+"Low-Pass: "+LowPassFilter.ALPHA + endl
+				+"Speed: "+MainActivity.speed;
 		
 		
 		if (accelerometerLabel != null) {
@@ -195,8 +202,8 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 			MainActivity.recordUtils.stopRecord();
 			recording = false;			
 		}else{
-			MainActivity.recordUtils.startRecord("_"+(records++));
-			MainActivity.recordUtils.addValue("velikost xy;velikost xy (kalibrováno);xy prùmìr (kalibrováno);velikost z;velikost z (kalibrováno); z prùmìr (kalibrováno)");
+			MainActivity.recordUtils.startRecord("_"+(records++));			
+			MainActivity.recordUtils.addValue("velikost_xy;velikost_xy(kalibrováno);xy_prùmìr;xy_smìrodatná_odchylka;velikost_z;velikost_z(kalibrováno);z_prùmìr;mez;nad limit;z_smìrodatná_odchylka;alpha;rychlost");
 			recording = true;
 		}
 		return recording;

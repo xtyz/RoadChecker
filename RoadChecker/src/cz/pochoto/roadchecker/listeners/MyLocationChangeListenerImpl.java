@@ -4,6 +4,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 
+import cz.pochoto.roadchecker.MainActivity;
 import android.location.Location;
 
 public class MyLocationChangeListenerImpl implements MyLocationChangeListener {
@@ -20,6 +21,7 @@ public class MyLocationChangeListenerImpl implements MyLocationChangeListener {
 				e.printStackTrace();
 			}						
 		}
+		MainActivity.speed = loc.getSpeed();
 	}
 
 	public void setMap(GoogleMap mMap) {
