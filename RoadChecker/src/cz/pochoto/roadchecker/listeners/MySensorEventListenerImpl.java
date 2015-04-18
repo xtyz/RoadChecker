@@ -18,17 +18,19 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 	
 	private float[] stableR = null;
 	private boolean recording = false;
-	private int calibrated = 0, records = 0;
-	private float[] currentR0 = new float[16];
+	private int records = 0;
 	private float[] currentR = new float[16];
 	private float[] inclination = new float[16];
 	private float[] stableG = new float[3];
 	private float[] oldG = new float[3];
-	private float[] currentG = new float[3];	
+	private float[] currentG = new float[3];
 	private float[] accelerationG = new float[3];
 	private float[] geomag = new float[3];
 	private float[] orientVals = new float[3];
 	private float[] angleChange = new float[3];
+	
+	private float[] mRotationX;
+	private float[] mRotationY;
 	private double stableGValue, currentGValue, accelerationGValue;
 
 	final float pi = (float) Math.PI;
@@ -52,8 +54,6 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 
 		currentG = LowPassFilter.filter(currentG, oldG).clone();		
 		oldG = currentG.clone();
-		// pokud je nalezena rotacni matice - pravdepodobne nebude treba bude se
-		// rotovat ze souèasného Z na Z 0,0,9
 
 		if (SensorManager.getRotationMatrix(currentR, inclination, currentG,
 				geomag)) {		
@@ -63,38 +63,28 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 				calibration();
 			}
 			
-			// vypocet uhlu o ktery je zarizeni natoceno
-			SensorManager.getOrientation(currentR, orientVals);
 			// vypocet zmeny uhlu o ktery je zarizeni natoceno
 			SensorManager.getAngleChange(angleChange, currentR, stableR);
 			// vypocet akcelerace		
 			accelerationG = new float[] { currentG[0] - stableG[0],	currentG[1] - stableG[1], currentG[2] - stableG[2] };
 
-			currentGValue = getVectorLenght(currentG);
-			stableGValue = getVectorLenght(stableG);
-			accelerationGValue = Math.abs(currentGValue - stableGValue);					
+			currentGValue = getVectorLenght(currentG);			
+			accelerationGValue = Math.abs(currentGValue - stableGValue);	
+																			
 			
-			// kdyz neni rozdil prilis velky, kalibruj jinak znazorni zrychleni
-																
-				//otoceni accelerationG o  minus orientvals (nejprve po x a pak po y) - promitnuti do 2d xy - ax a ay se budou dat promitnout
-				//kolem z ne - magnetometr
-			float[] mRotaceX = new float[]{1,0,0,0,
-											0,(float)Math.cos(-orientVals[1]),-(float)Math.sin(-orientVals[1]),0,
-											0,(float)Math.sin(-orientVals[1]),(float)Math.cos(-orientVals[1]),0,
-											0,0,0,1};
-				
-			float[] mRotaceY = new float[]{(float)Math.cos(-orientVals[2]),0,(float)Math.sin(-orientVals[2]),0,
-											0,1,0,0,													
-											-(float)Math.sin(-orientVals[2]),0,(float)Math.cos(-orientVals[2]),0,
-											0,0,0,1};
 				
 			float[] pom = new float[4];
 			float[] result = new float[4];
+			float[] currentGK = new float[4];
 			
 			
-			Matrix.multiplyMV(pom, 0, mRotaceX, 0, new float[]{accelerationG[0],accelerationG[1],accelerationG[2],1}, 0);
-			Matrix.multiplyMV(result, 0, mRotaceY, 0, pom, 0);
-							
+			Matrix.multiplyMV(pom, 0, mRotationX, 0, new float[]{accelerationG[0],accelerationG[1],accelerationG[2],1}, 0);
+			Matrix.multiplyMV(result, 0, mRotationY, 0, pom, 0);
+					
+			pom = new float[4];
+			
+			Matrix.multiplyMV(pom, 0, mRotationX, 0, new float[]{currentG[0],currentG[1],currentG[2],1}, 0);
+			Matrix.multiplyMV(currentGK, 0, mRotationY, 0, pom, 0);
 			
 			xySensorUtils.compute(getVectorLenght(new float[]{result[0],result[1]}));
 			zSensorUtils.compute(Math.abs(result[2]));
@@ -117,14 +107,34 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 				MainActivity.recordUtils.addValue(getVectorLenght(new float[]{accelerationG[0],accelerationG[1]})+";"+getVectorLenght(new float[]{result[0],result[1]})+";"+xyMean+";"+xyDeviation+";"+Math.abs(accelerationG[2])+";"+Math.abs(result[2])+";"+zMean+";0.0;"+zSensorUtils.getDisplacement()+";"+zDeviation+";"+LowPassFilter.ALPHA+";"+MainActivity.speed);
 			}
 									
-			showResults();			
+			showResults(currentGK);			
 		}
 	}
 
-
+	public void calibration(){				
+		stableR = currentR.clone();
+		stableG = currentG.clone();
+		stableGValue = getVectorLenght(stableG);
+		// vypocet uhlu o ktery je zarizeni natoceno
+		SensorManager.getOrientation(currentR, orientVals);
+		//otoceni accelerationG o  minus orientvals (nejprve po x a pak po y) - promitnuti do 2d xy - ax a ay se budou dat promitnout
+		//kolem z ne - magnetometr
+		mRotationX = new float[]{1,0,0,0,
+										0,(float)Math.cos(orientVals[1]),-(float)Math.sin(orientVals[1]),0,
+										0,(float)Math.sin(orientVals[1]),(float)Math.cos(orientVals[1]),0,
+										0,0,0,1};
+			
+		mRotationY = new float[]{(float)Math.cos(-orientVals[2]),0,(float)Math.sin(-orientVals[2]),0,
+										0,1,0,0,													
+										-(float)Math.sin(-orientVals[2]),0,(float)Math.cos(-orientVals[2]),0,
+										0,0,0,1};
+		if (glSurfaceView != null) {
+			glSurfaceView.setTrianglePosition(new float[3]);
+		}		
+	}
 
 	private double getVectorLenght(float[] f) {
-		if (f.length == 3) {
+		if (f.length == 3 || f.length == 4) {
 			return Math.sqrt(f[0] * f[0] + f[1] * f[1] + f[2] * f[2]);
 		}
 		if (f.length == 2){
@@ -135,28 +145,38 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		// TODO Auto-generated method stub
-
+		switch (accuracy) {
+		case SensorManager.SENSOR_STATUS_ACCURACY_HIGH:			
+			break;
+		case SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM:			
+			break;
+		case SensorManager.SENSOR_STATUS_ACCURACY_LOW:			
+			break;
+		case SensorManager.SENSOR_STATUS_UNRELIABLE:			
+			break;
+		case SensorManager.SENSOR_STATUS_NO_CONTACT:			
+			break;
+		}
 	}
 	
-	private void showResults(){
+	private void showResults(float[] result){
 		String accLabel = "Akcelerometr:"+endl+"C: " + currentGValue + endl+"x: "
 				+ currentG[0] + endl+"y: " + currentG[1] + endl+"z: "
 				+ currentG[2] + endl+
+				"Akcelerometr Kalibrováno:"+endl+"C: " + getVectorLenght(result) + endl+"x: "
+				+ result[0] + endl+"y: " + result[1] + endl+"z: "
+				+ result[2] + endl+
 				"Akcelerace: "+endl+"C: "
 				+ accelerationGValue + endl+"x: "
 				+ accelerationG[0] + endl+"y: " + accelerationG[1] + endl+"z: "
 				+ accelerationG[2];		
 
-		float azimuth = angleChange[0] * rad2deg;
-		float pitch = angleChange[1] * rad2deg;
-		float roll = angleChange[2] * rad2deg;
+		double azimuth = Math.toDegrees(angleChange[0]);
+		double pitch = Math.toDegrees(angleChange[1]);
+		double roll = Math.toDegrees(angleChange[2]);
 
-		String gyrLabel = "Rotation:" + endl + currentR[0] + " "
-				+ currentR[1] + " " + currentR[2] + endl + currentR[4]
-				+ " " + currentR[5] + " " + currentR[6] + endl
-				+ currentR[8] + " " + currentR[9] + " " + currentR[10]
-				+ endl + endl + "Inclination change" + endl
+		String gyrLabel = 
+				"Inclination change" + endl
 				+ "Azimuth (z): " + azimuth + endl + "Pitch (x): " + pitch
 				+ endl + "Roll: (y)" + roll + endl + endl
 				+ "Total inclination" + endl + "Azimuth: (z)"
@@ -181,17 +201,6 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 		
 	}
 	
-	public void calibration(){
-		//natoceni os souradnic
-		//normalni - display nahore			
-		stableR = currentR.clone();
-		stableG = currentG.clone();
-		if (glSurfaceView != null) {
-			glSurfaceView.setTrianglePosition(new float[3]);
-		}
-		
-	}
-	
 	public void calibrate(){
 		calibration();
 	}
@@ -208,37 +217,7 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 		}
 		return recording;
 	}	
-	
-	@SuppressWarnings("unused")
-	private void convertToCalibrationValues(){
-		//TODO zkontrolovat remap popripade overit správnost
-		if(calibrated == 1){
-			//tlacitka dole
-			System.out.println("tl dole");
-			//SensorManager.remapCoordinateSystem(currentR0, SensorManager.AXIS_X, SensorManager.AXIS_Z, currentR);
-			currentG = new float[]{currentG[0],currentG[2], currentG[1]};
-			stableG = new float[]{stableG[0],stableG[2], stableG[1]};
-			accelerationG = new float[]{accelerationG[0],accelerationG[2], accelerationG[1]};
-		}else if(calibrated == 2){
-			//tlacitka v pravo
-			System.out.println("tl vpravo");
-			//SensorManager.remapCoordinateSystem(currentR0, SensorManager.AXIS_Z, SensorManager.AXIS_MINUS_X, currentR);
-			currentG = new float[]{currentG[2],-currentG[1], currentG[0]};
-			stableG = new float[]{stableG[0],stableG[2], stableG[1]};
-			accelerationG = new float[]{accelerationG[2],-accelerationG[1], accelerationG[0]};
-		}else if(calibrated == 3){
-			// tlacitka v levo
-			System.out.println("tl vlevo");
-			//SensorManager.remapCoordinateSystem(currentR0, SensorManager.AXIS_MINUS_Z, SensorManager.AXIS_X, currentR);
-			currentG = new float[]{-currentG[2],-currentG[1], -currentG[0]};
-			stableG = new float[]{stableG[0],stableG[2], stableG[1]};
-			accelerationG = new float[]{-accelerationG[2],-accelerationG[1], accelerationG[0]};
-		}else if(calibrated == 0){
-			currentR = currentR0.clone();
-			System.out.println("na zadech");
-		}
-	}
-	
+		
 	public TextView getAccelerometerLabel() {
 		return accelerometerLabel;
 	}

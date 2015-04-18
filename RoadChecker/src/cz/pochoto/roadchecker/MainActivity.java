@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -285,6 +286,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	public void calibrate(View view){
 		if(mSensorEventListener != null){
 			mSensorEventListener.calibrate();
+			Toast.makeText(getApplicationContext(), "Calibrated", Toast.LENGTH_SHORT).show();
 		}		
 	}
 
