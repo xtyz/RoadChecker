@@ -58,7 +58,7 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 			if (stableR == null || stableG == null) {
 				calibration();
 			}
-			calibration();
+			
 			// vypocet zmeny uhlu o ktery je zarizeni natoceno
 			SensorManager.getAngleChange(angleChange, currentR, stableR);
 			// vypocet akcelerace		
@@ -110,16 +110,9 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 		Matrix.setIdentityM(mTransformation, 0);
 		Matrix.setIdentityM(mRotationX, 0);
 		Matrix.setIdentityM(mRotationY, 0);
-		
-		if(accelerationG[2] < 0){			
-			Matrix.setRotateM(mRotationX, 0, Math.round(Math.toDegrees(orientVals[1] - Math.PI)), 1f, 0f, 0f);			
-		}else{
-			Matrix.setRotateM(mRotationX, 0, Math.round(-Math.toDegrees(orientVals[1])), 1f, 0f, 0f);			
-		}		
-		
-		Matrix.setRotateM(mRotationY, 0, Math.round(Math.toDegrees(orientVals[2])), 0f, 1f, 0f);
-			
-	
+				
+		Matrix.setRotateM(mRotationX, 0, Math.round(-Math.toDegrees(orientVals[1])), 1f, 0f, 0f);		
+		Matrix.setRotateM(mRotationY, 0, Math.round(Math.toDegrees(orientVals[2])), 0f, 1f, 0f);	
 		
 		Matrix.multiplyMM(mTransformation, 0, mRotationX, 0, mRotationY, 0);
 		
