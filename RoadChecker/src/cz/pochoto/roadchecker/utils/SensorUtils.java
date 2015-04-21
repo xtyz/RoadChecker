@@ -21,9 +21,11 @@ public class SensorUtils {
 	private byte timer = 1;
 	private final int timeline = 10000;
 	private List<Double> displacements = new ArrayList<Double>();
+	private List<Double> maxDisplacements = new ArrayList<Double>();
 	
 	private float speed = 0;
 	private boolean displacementFound = false;
+	private boolean foundNewMax = false;
 	
 	double currentAcc;
 
@@ -107,10 +109,21 @@ public class SensorUtils {
 		}else{
 			if(displacementFound){
 				displacementFound = false;
+				foundNewMax = true;
+				maxDisplacements.add(Double.valueOf(lastMaxDisplacement));
 				lastMaxDisplacement = 0;
 			}
+			foundNewMax = false;
 			displacements.add(0d);
 		}
+
+	}
+	
+	public double getMaxDisplacement(){
+		if(foundNewMax){
+			return maxDisplacements.get(maxDisplacements.size() - 1);
+		}
+		return 0;
 	}
 
 	public double getDisplacement() {

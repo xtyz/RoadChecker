@@ -11,7 +11,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -26,12 +25,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 
 import cz.pochoto.roadchecker.handlers.GLSurfaceHandler;
 import cz.pochoto.roadchecker.handlers.MapHandler;
@@ -44,7 +40,7 @@ import cz.pochoto.roadchecker.utils.RecordUtils;
 
 @SuppressWarnings("deprecation")
 public class MainActivity extends Activity implements ActionBar.TabListener,
-		ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
+		ConnectionCallbacks, OnConnectionFailedListener {
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -70,6 +66,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	public static TextView accelerometerLabel, gyroscopeLabel;
 	public static Button calibrateM, calibrateG;
 	public static SeekBar barM, barG;
+	public static ActionBar actionBar;
 	public static int count = 50;
 	public static float speed = 0;
 	
@@ -80,15 +77,12 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	 */
 	protected static ViewPager mViewPager;
 	protected static MyGLSurfaceView mGLView;
-
-	private static GoogleApiClient mGoogleApiClient;
 	private static LocationRequest mLocationRequest;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		buildGoogleApiClient();
+		setContentView(R.layout.activity_main);		
 		
 		// init resources		
 		recordUtils = new RecordUtils(getApplicationContext());		
@@ -109,9 +103,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		
 
 		// Set up the action bar.
-		final ActionBar actionBar = getActionBar();
+		actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);		
-
+		actionBar.setSubtitle(String.valueOf(speed) + " km/h");
+		
 		mSectionsPagerAdapter = new SectionsPagerAdapter(fragmentManager);
 
 		// Set up the ViewPager with the sections adapter.
@@ -138,6 +133,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 					.setText(mSectionsPagerAdapter.getPageTitle(i))
 					.setTabListener(this));
 		}
+				
 	}
 	
 	public static void registerSensorListeners() {
@@ -253,12 +249,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
 	}
 
-	protected synchronized void buildGoogleApiClient() {
-		mGoogleApiClient = new GoogleApiClient.Builder(this)
-				.addConnectionCallbacks(this)
-				.addOnConnectionFailedListener(this)
-				.addApi(LocationServices.API).build();
-	}
+
 
 	protected void createLocationRequest() {
 		mLocationRequest = new LocationRequest();
@@ -267,16 +258,6 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 	}
 
-	public void startLocationUpdates() {
-		LocationServices.FusedLocationApi.requestLocationUpdates(
-				mGoogleApiClient, mLocationRequest, this);
-	}
-
-	@Override
-	public void onLocationChanged(Location loc) {
-		speed = loc.getSpeed();
-	}
-	
 	public void rec(View view){
 		if(mSensorEventListener != null){
 			mSensorEventListener.record();
@@ -324,7 +305,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 			gyroscopeLabel = (TextView) rootView.findViewById(R.id.gyroscope);
 			if(barM == null){
 				barM = (SeekBar)rootView.findViewById(R.id.seekAlpha);
-				barM.setProgress(1000);
+				barM.setProgress(500);
 				barM.setOnSeekBarChangeListener(new MySeekBarListener("M"));
 			}			
 			mSensorEventListener.setAccelerometerLabel(accelerometerLabel);
@@ -436,6 +417,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 			glSurfaceHandler.onResume();
 			super.onResume();
 		}
+	}
+
+	public static void setSpeed(float f) {
+		speed = f;
+		actionBar.setSubtitle(String.valueOf(speed) + " km/h");		
 	}
 
 }

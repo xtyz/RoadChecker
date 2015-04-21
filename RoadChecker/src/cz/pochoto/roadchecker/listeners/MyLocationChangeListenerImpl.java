@@ -21,7 +21,7 @@ public class MyLocationChangeListenerImpl implements MyLocationChangeListener {
 				e.printStackTrace();
 			}						
 		}
-		MainActivity.speed = loc.getSpeed();
+		MainActivity.setSpeed(loc.getSpeed() * 3.6f);
 	}
 
 	public void setMap(GoogleMap mMap) {
