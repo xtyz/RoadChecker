@@ -18,4 +18,6 @@ public interface MySensorEventListener extends SensorEventListener {
 	public void calibrate();
 	
 	public boolean record();
+
+	public boolean calibrationControl();
 }

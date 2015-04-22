@@ -164,7 +164,12 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 			return true;
 		}
 		if (id == R.id.action_calibrate) {
-			mSensorEventListener.calibrate();
+			if(mSensorEventListener.calibrationControl()){
+				Toast.makeText(getApplicationContext(), "Kontrola kalibrace ZAPNUTA", Toast.LENGTH_SHORT).show();
+				actionBar.getTabAt(0).select();
+			}else{
+				Toast.makeText(getApplicationContext(), "Kontrola kalibrace VYPNUTA", Toast.LENGTH_SHORT).show();
+			}
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

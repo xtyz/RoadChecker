@@ -18,7 +18,7 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 	private SensorUtils zSensorUtils = new SensorUtils();
 	
 	private float[] stableR = null;
-	private boolean recording = false;
+	private boolean recording = false, calibrationControl = false;
 	private int records = 0;
 	private float[] currentR = new float[16];
 	private float[] inclination = new float[16];
@@ -56,7 +56,7 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 		if (SensorManager.getRotationMatrix(currentR, inclination, currentG, geomag)) {		
 			
 			// prvni spusteni
-			if (stableR == null || stableG == null) {
+			if (stableR == null || stableG == null || calibrationControl) {
 				calibration();
 			}
 			
@@ -218,7 +218,13 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 			recording = true;
 		}
 		return recording;
-	}	
+	}
+	
+	@Override
+	public boolean calibrationControl() {
+		calibrationControl = !calibrationControl;
+		return calibrationControl;
+	}
 		
 	public TextView getAccelerometerLabel() {
 		return accelerometerLabel;

@@ -7,7 +7,7 @@
     <string name="title_section3">Mapa</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Nastavení</string>
-    <string name="action_calibrate">Kalibrace</string>
+    <string name="action_calibrate">Kontrola kalibrace</string>
     <string name="btn_calibrate">Kalibrace</string>
     <string name="btn_rec">●</string>
 
