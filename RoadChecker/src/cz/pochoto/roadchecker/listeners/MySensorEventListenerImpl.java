@@ -80,16 +80,7 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 			double xyMean = xySensorUtils.getFinalMean();				
 			double zMean = zSensorUtils.getFinalMean();
 			double xyDeviation = xySensorUtils.getFinalDeviation();
-			double zDeviation = zSensorUtils.getFinalDeviation();
-				
-			if (glSurfaceView != null) {
-				glSurfaceView.setTrianglePosition(new float[] { result[0], result[1], result[2]});
-				glSurfaceView.setSquareScale(xyMean);
-				glSurfaceView.setAvgZSquareScale(zMean);
-				if(xySensorUtils.getDisplacement()!=0)glSurfaceView.setMaxSquareScale(xySensorUtils.getDisplacement());
-				glSurfaceView.render();
-			}
-			
+			double zDeviation = zSensorUtils.getFinalDeviation();			
 			Displacement lastDisplacement = zSensorUtils.getMaxDisplacement();
 			double lastMaxDisplacement = 0;
 			float speed = 0;
@@ -100,6 +91,16 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 					MainActivity.mapHandler.addMatker(lastDisplacement);
 				}
 			}			
+				
+			if (glSurfaceView != null) {
+				glSurfaceView.setTrianglePosition(new float[] { result[0], result[1], result[2]});
+				glSurfaceView.setSquareScale(xyMean);
+				glSurfaceView.setAvgZSquareScale(zMean);
+				if(lastMaxDisplacement!=0)glSurfaceView.setMaxSquareScale(lastMaxDisplacement);
+				glSurfaceView.render();
+			}
+			
+					
 			
 			if(MainActivity.location != null){
 				speed = MainActivity.location.getSpeed();				

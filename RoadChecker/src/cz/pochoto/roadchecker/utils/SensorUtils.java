@@ -130,7 +130,7 @@ public class SensorUtils {
 			if(size > 1){
 				long timeDif = maxDisplacements.get(size - 1).getTime() - maxDisplacements.get(size - 2).getTime();
 				System.out.println(timeDif / 1000l + " s");
-				if(timeDif < 1000){//TODO èas se musí øídít rychlostí
+				if(timeDif < 1000){//TODO èas se musí øídít rychlostí, pravdepodobne bude nutné pøidat casch která bude analyzovat jen ty vyssi 
 					return null;
 				}
 			}

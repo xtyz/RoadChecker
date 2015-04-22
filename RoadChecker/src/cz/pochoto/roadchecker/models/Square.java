@@ -143,5 +143,9 @@ public class Square {
 		float colorBlue[] = { 0.2f, 0.709803922f, 0.898039216f, 0.5f };
     	this.color = colorBlue;		
 	}
-
+	
+	public void setColorGreen(){
+    	float colorGreen[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.5f };
+    	this.color = colorGreen;
+    }
 }

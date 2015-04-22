@@ -68,19 +68,23 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		// Calculate the projection and view transformation
 		Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
-		//draw max square
-		Matrix.scaleM(mScaleMatrix, 0, maxScale, maxScale, maxScale);		
-		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
-		mSquare.setColorRed();
-		mSquare.draw(scratchSquare);
-		
 		Matrix.setIdentityM(mScaleMatrix, 0);
 		
 		// Draw average square		
 		Matrix.scaleM(mScaleMatrix, 0, scale, scale, scale);
 		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
 		mSquare.setColorBlue();
-		mSquare.draw(scratchSquare);		
+		mSquare.draw(scratchSquare);
+		
+		
+		Matrix.setIdentityM(mScaleMatrix, 0);
+		
+		// Draw maxZ square		
+		Matrix.scaleM(mScaleMatrix, 0, 0.2f, maxScale, 0f);
+		Matrix.translateM(mScaleMatrix, 0, -5f, 0, 0);
+		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
+		mSquare.setColorRed();
+		mSquare.draw(scratchSquare);
 
 		
 		Matrix.setIdentityM(mScaleMatrix, 0);
@@ -89,9 +93,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		Matrix.scaleM(mScaleMatrix, 0, 0.2f, f[2], 0f);
 		Matrix.translateM(mScaleMatrix, 0, -5f, 0, 0);
 		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
-		mSquare.setColorRed();
+		mSquare.setColorGreen();
 		mSquare.draw(scratchSquare);
 		
+				
 		Matrix.setIdentityM(mScaleMatrix, 0);
 		
 		// Draw averageZ square		
@@ -99,10 +104,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		Matrix.translateM(mScaleMatrix, 0, -5f, 0, 0);
 		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
 		mSquare.setColorBlue();
-		mSquare.draw(scratchSquare);
+		mSquare.draw(scratchSquare);		
 		
 		
-
 		// Create a rotation for the triangle
 		Matrix.translateM(mModelMatrix, 0, f[0] / 10f, -f[1] / 10f, f[2] / 10f);
 		mTriangle.setTriangleCoords(f);		
