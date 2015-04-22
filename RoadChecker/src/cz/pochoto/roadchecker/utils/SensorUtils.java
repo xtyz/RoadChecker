@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.pochoto.roadchecker.MainActivity;
+import cz.pochoto.roadchecker.models.Displacement;
 
 public class SensorUtils {
 	private Mean mean1;
@@ -21,9 +22,8 @@ public class SensorUtils {
 	private byte timer = 1;
 	private final int timeline = 10000;
 	private List<Double> displacements = new ArrayList<Double>();
-	private List<Double> maxDisplacements = new ArrayList<Double>();
+	private List<Displacement> maxDisplacements = new ArrayList<Displacement>();
 	
-	private float speed = 0;
 	private boolean displacementFound = false;
 	private boolean foundNewMax = false;
 	
@@ -110,20 +110,33 @@ public class SensorUtils {
 			if(displacementFound){
 				displacementFound = false;
 				foundNewMax = true;
-				maxDisplacements.add(Double.valueOf(lastMaxDisplacement));
+				Displacement d = new Displacement(System.currentTimeMillis(), lastMaxDisplacement);
+				if(MainActivity.location != null){
+					d.setLoc(MainActivity.location);
+				}
+				maxDisplacements.add(d);
+				System.out.println(d.getValue());
 				lastMaxDisplacement = 0;
 			}
-			foundNewMax = false;
 			displacements.add(0d);
 		}
 
 	}
 	
-	public double getMaxDisplacement(){
+	public Displacement getMaxDisplacement(){
 		if(foundNewMax){
-			return maxDisplacements.get(maxDisplacements.size() - 1);
+			foundNewMax = false;
+			int size = maxDisplacements.size();
+			if(size > 1){
+				long timeDif = maxDisplacements.get(size - 1).getTime() - maxDisplacements.get(size - 2).getTime();
+				System.out.println(timeDif / 1000l + " s");
+				if(timeDif < 1000){//TODO èas se musí øídít rychlostí
+					return null;
+				}
+			}
+			return maxDisplacements.get(size - 1);
 		}
-		return 0;
+		return null;
 	}
 
 	public double getDisplacement() {
@@ -131,15 +144,8 @@ public class SensorUtils {
 			return 0;
 		}
 		return displacements.get(displacements.size()-1);
-	}
+	}	
 	
-	private float getSpeed(){
-		if(speed != MainActivity.speed){
-			speed = MainActivity.speed;
-		}
-		return speed;
-	}
-
 	private byte getTimer() {
 		long currentTime = System.currentTimeMillis() % timeline;
 		byte timer = 1;

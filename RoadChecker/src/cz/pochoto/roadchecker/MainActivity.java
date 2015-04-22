@@ -11,6 +11,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -68,7 +69,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	public static SeekBar barM, barG;
 	public static ActionBar actionBar;
 	public static int count = 50;
-	public static float speed = 0;
+	public static Location location = null;
 	
 	
 
@@ -95,17 +96,16 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		
 		mapHandler = new MapHandler();
 		mapHandler.setLocationChangeListener(mLocationChangeListener);
-		
+				
 		glSurfaceHandler = new GLSurfaceHandler();
 		glSurfaceHandler.setSensorEventListener(mSensorEventListener);		
 		
 		fragmentManager = getFragmentManager();
 		
-
 		// Set up the action bar.
 		actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);		
-		actionBar.setSubtitle(String.valueOf(speed) + " km/h");
+		actionBar.setSubtitle(String.valueOf(location) + " km/h");
 		
 		mSectionsPagerAdapter = new SectionsPagerAdapter(fragmentManager);
 
@@ -133,7 +133,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 					.setText(mSectionsPagerAdapter.getPageTitle(i))
 					.setTabListener(this));
 		}
-				
+		
+		actionBar.getTabAt(1).select();
 	}
 	
 	public static void registerSensorListeners() {
@@ -205,9 +206,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 				return PlaceholderFragment.newInstance(position + 1);
 			case 1:
 				return GLSurfaceFragment.newInstance(position + 1);
-			default:				
+			case 2:				
 				return MyMapFragment.newInstance(position + 1);
 			}
+			return null;
 		}
 
 		@Override
@@ -305,12 +307,15 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 			gyroscopeLabel = (TextView) rootView.findViewById(R.id.gyroscope);
 			if(barM == null){
 				barM = (SeekBar)rootView.findViewById(R.id.seekAlpha);
-				barM.setProgress(500);
+				if(barG == null){
+					barM.setProgress(500);
+				}else{
+					barM.setProgress(barG.getProgress());
+				}		
 				barM.setOnSeekBarChangeListener(new MySeekBarListener("M"));
 			}			
 			mSensorEventListener.setAccelerometerLabel(accelerometerLabel);
-			mSensorEventListener.setGyroscopeLabel(gyroscopeLabel);
-			
+			mSensorEventListener.setGyroscopeLabel(gyroscopeLabel);			
 			
 			return rootView;
 		}
@@ -318,8 +323,6 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
 		@Override
 		public void onPause() {
-			//kdyz se neodregistruje, bezi na pozadi.. toho se necha vyuzit :)
-			//sensorManager.unregisterListener(acceletometerListener);
 			super.onPause();
 		}
 		
@@ -395,7 +398,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 			View rootView = glSurfaceHandler.getRootView(inflater, container);
 			if(barG == null){
 				barG = (SeekBar)rootView.findViewById(R.id.seekAlpha);
-				barG.setProgress(barM.getProgress());
+				if(barM == null){
+					barG.setProgress(500);
+				}else{
+					barG.setProgress(barM.getProgress());
+				}				
 				barG.setOnSeekBarChangeListener(new MySeekBarListener("G"));
 			}			
 			return glSurfaceHandler.getRootView(inflater, container);
@@ -419,9 +426,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		}
 	}
 
-	public static void setSpeed(float f) {
-		speed = f;
-		actionBar.setSubtitle(String.valueOf(speed) + " km/h");		
+	public static void setLocation(Location loc) {
+		location = loc;
+		actionBar.setSubtitle(String.valueOf(location.getSpeed()) + " km/h");		
 	}
 
 }

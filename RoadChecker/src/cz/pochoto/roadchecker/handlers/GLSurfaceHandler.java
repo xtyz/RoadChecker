@@ -33,7 +33,7 @@ public class GLSurfaceHandler extends AbstractHandler{
 			TextView glSurfaceTextView = (TextView)rootView.findViewById(R.id.gl_surface_text);
 			glSurfaceTextView.setTextColor(Color.WHITE);			
 			mGLView.setTextView(glSurfaceTextView);
-		}			
+		}
 		
 		mGLView.setSensorEventListener(mSensorEventListener);		
 	}

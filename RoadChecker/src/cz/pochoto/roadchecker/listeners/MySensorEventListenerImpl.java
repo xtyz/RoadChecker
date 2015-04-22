@@ -1,6 +1,7 @@
 package cz.pochoto.roadchecker.listeners;
 
 import cz.pochoto.roadchecker.MainActivity;
+import cz.pochoto.roadchecker.models.Displacement;
 import cz.pochoto.roadchecker.opengl.MyGLSurfaceView;
 import cz.pochoto.roadchecker.utils.LowPassFilter;
 import cz.pochoto.roadchecker.utils.SensorUtils;
@@ -89,9 +90,24 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 				glSurfaceView.render();
 			}
 			
+			Displacement lastDisplacement = zSensorUtils.getMaxDisplacement();
+			double lastMaxDisplacement = 0;
+			float speed = 0;
+			
+			if(lastDisplacement != null){
+				lastMaxDisplacement = lastDisplacement.getValue();
+				if(MainActivity.mapHandler != null){
+					MainActivity.mapHandler.addMatker(lastDisplacement);
+				}
+			}			
+			
+			if(MainActivity.location != null){
+				speed = MainActivity.location.getSpeed();				
+			}			
+			
 			if(recording){
 				// velikost xy;velikost xy kaliblováno; xy prumer; xy odchylka; z; z kalibrováno; z prumer; mez; z odchylka; alfa; rychlost
-				MainActivity.recordUtils.addValue(getVectorLenght(new float[]{accelerationG[0],accelerationG[1]})+";"+getVectorLenght(new float[]{result[0],result[1]})+";"+xyMean+";"+xyDeviation+";"+Math.abs(accelerationG[2])+";"+Math.abs(result[2])+";"+zMean+";"+(zMean+1)+";"+zSensorUtils.getDisplacement()+";"+zSensorUtils.getMaxDisplacement()+";"+zDeviation+";"+LowPassFilter.ALPHA+";"+MainActivity.speed);
+				MainActivity.recordUtils.addValue(getVectorLenght(new float[]{accelerationG[0],accelerationG[1]})+";"+getVectorLenght(new float[]{result[0],result[1]})+";"+xyMean+";"+xyDeviation+";"+Math.abs(accelerationG[2])+";"+Math.abs(result[2])+";"+zMean+";"+(zMean+1)+";"+zSensorUtils.getDisplacement()+";"+lastMaxDisplacement+";"+zDeviation+";"+LowPassFilter.ALPHA+";"+speed);
 			}
 									
 			showResults(currentGK);			

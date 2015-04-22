@@ -1,5 +1,8 @@
 package cz.pochoto.roadchecker.handlers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,12 +16,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import cz.pochoto.roadchecker.MainActivity;
 import cz.pochoto.roadchecker.R;
 import cz.pochoto.roadchecker.listeners.MyLocationChangeListenerImpl;
+import cz.pochoto.roadchecker.models.Displacement;
 
 public class MapHandler extends AbstractHandler{
 	
 	private static GoogleMap mMap;
 	
 	private static View rootView;
+	
+	private List<Displacement> displacements = new ArrayList<Displacement>();
 
 	private MyLocationChangeListenerImpl mLocationChangeListener;
 	
@@ -38,15 +44,33 @@ public class MapHandler extends AbstractHandler{
 		    mMap.setMyLocationEnabled(true);
 		    
 		    mLocationChangeListener.setMap(mMap);
-		    
-		    mMap.setOnMyLocationChangeListener(mLocationChangeListener);	    
+		    mLocationChangeListener.setMapHandler(this);
+		    mMap.setOnMyLocationChangeListener(mLocationChangeListener);		    
 	    }
 	}
 
 	
-	public void addMatker(Double latitude, Double longtitude){
-		// For dropping a marker at a point on the Map
-	    mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longtitude)).title("Aktuální pozice").snippet("Home Address"));
+	public void addMatker(Displacement displacement){
+		System.out.println("added " + displacement.getValue());
+		displacements.add(displacement);
+		showMarkers();
+	}
+	
+	public void showMarkers(){		
+		if(mMap != null){
+			if(!displacements.isEmpty()){				
+				for(Displacement d:displacements){
+					if(d.getLoc() != null){
+						System.out.println("Marker added " + d.getValue());
+						mMap.addMarker(new MarkerOptions().position(new LatLng(d.getLoc().getLatitude(), d.getLoc().getLongitude())).title("Výchylka").snippet(d.getValue()+""));												
+					}else{
+						System.out.println("not located");
+					}
+				}
+				System.out.println("cleared");
+				displacements.clear();
+			}
+		}
 	}
 	
 	public void destroyMap(){
