@@ -22,10 +22,11 @@ public class SensorUtils {
 	private byte timer = 1;
 	private final int timeline = 10000;
 	private List<Double> displacements = new ArrayList<Double>();
-	private List<Displacement> maxDisplacements = new ArrayList<Displacement>();
+	private List<Displacement> cacheDisplacements = new ArrayList<Displacement>();
 	
 	private boolean displacementFound = false;
-	private boolean foundNewMax = false;
+	
+	private final static float TIME_LIMIT = 1000l;
 	
 	double currentAcc;
 
@@ -108,13 +109,12 @@ public class SensorUtils {
 			displacements.add(acc);
 		}else{
 			if(displacementFound){
-				displacementFound = false;
-				foundNewMax = true;
+				displacementFound = false;				
 				Displacement d = new Displacement(System.currentTimeMillis(), lastMaxDisplacement);
 				if(MainActivity.location != null){
 					d.setLoc(MainActivity.location);
 				}
-				maxDisplacements.add(d);
+				cacheDisplacements.add(d);
 				System.out.println(d.getValue());
 				lastMaxDisplacement = 0;
 			}
@@ -123,19 +123,31 @@ public class SensorUtils {
 
 	}
 	
-	public Displacement getMaxDisplacement(){
-		if(foundNewMax){
-			foundNewMax = false;
-			int size = maxDisplacements.size();
-			if(size > 1){
-				long timeDif = maxDisplacements.get(size - 1).getTime() - maxDisplacements.get(size - 2).getTime();
-				System.out.println(timeDif / 1000l + " s");
-				if(timeDif < 1000){//TODO èas se musí øídít rychlostí, pravdepodobne bude nutné pøidat casch která bude analyzovat jen ty vyssi 
-					return null;
+	public Displacement getMaxDisplacement(){		
+		
+		if(!cacheDisplacements.isEmpty()){
+			int size = cacheDisplacements.size();
+			long timeDif = System.currentTimeMillis() - cacheDisplacements.get(size - 1).getTime();				
+			
+			System.out.println(timeDif / 1000l + " s");
+			//pokud uplynul urcity cas od posledni vychylky vypocitat max a vratit vysledek
+			if(timeDif < TIME_LIMIT){
+				return null;
+			}	
+			try{
+				Displacement max = cacheDisplacements.get(0);
+				for(Displacement d:cacheDisplacements){
+					if(d.getValue() > max.getValue()){
+						max = d;
+					}
 				}
+				System.out.println("Nejvetší: "+max.getValue());
+				return max;
+			}finally{
+				cacheDisplacements.clear();
 			}
-			return maxDisplacements.get(size - 1);
-		}
+		}		
+		
 		return null;
 	}
 
