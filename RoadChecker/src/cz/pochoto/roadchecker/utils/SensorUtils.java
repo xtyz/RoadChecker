@@ -6,6 +6,11 @@ import java.util.List;
 import cz.pochoto.roadchecker.MainActivity;
 import cz.pochoto.roadchecker.models.Displacement;
 
+/**
+ * Class accesses calculations for sensor operations
+ * @author Tomáš Pochobradský
+ *
+ */
 public class SensorUtils {
 	private Mean mean1;
 	private Mean mean2;
@@ -20,12 +25,13 @@ public class SensorUtils {
 	private double finalDeviation = 0;
 	private double lastMaxDisplacement = 0;
 	private byte timer = 1;
-	private final int timeline = 10000;
-	private List<Double> displacements = new ArrayList<Double>();
-	private List<Displacement> cacheDisplacements = new ArrayList<Displacement>();
-	
 	private boolean displacementFound = false;
 	
+	private List<Double> displacements = new ArrayList<Double>();
+	private List<Displacement> cacheDisplacements = new ArrayList<Displacement>();	
+	
+	private final static int TIMELINE = 10000;
+	private final static int DISPLACEMENT_LIMIT = 1;
 	private final static float TIME_LIMIT = 1000l;
 	
 	double currentAcc;
@@ -41,6 +47,10 @@ public class SensorUtils {
 		st4 = new StandardDeviation();
 	}
 
+	/**
+	 * Compute new values on calsulations with new double value of sensors
+	 * @param value
+	 */
 	public void compute(double value) {
 		// compute timer and reset neccessery
 		byte timer = getTimer();
@@ -58,21 +68,37 @@ public class SensorUtils {
 		st3.addValue(currentAcc, mean3.getResult());
 		st4.addValue(currentAcc, mean4.getResult());
 
-		// compute average
 		finalMean = computeAverage(timer, mean1, mean2, mean3, mean4);
 		finalDeviation = computeAverage(timer, st1, st2, st3, st4);
 
-		resoleveDisplacements(currentAcc, finalMean, finalDeviation);		
+		resoleveDisplacements(currentAcc, finalMean);		
 	}
 	
+	/**
+	 * Returns final mean from counitng
+	 * @return
+	 */
 	public double getFinalMean() {
 		return finalMean;
 	}
 
+	/**
+	 * Returns final deviation from counitng
+	 * @return
+	 */
 	public double getFinalDeviation() {
 		return finalDeviation;
 	}
 
+	/**
+	 * Compute four-component calculation based on timer
+	 * @param timer
+	 * @param ac1
+	 * @param ac2
+	 * @param ac3
+	 * @param ac4
+	 * @return
+	 */
 	private double computeAverage(byte timer, AbstractCounter ac1, AbstractCounter ac2, AbstractCounter ac3, AbstractCounter ac4){
 		double result = 0;
 		switch (timer) {
@@ -92,14 +118,19 @@ public class SensorUtils {
 		return result;
 	}
 
-	private void resoleveDisplacements(double acc, double mean, double finalDeviation) {
+	/**
+	 * Method resolving displacements based on current acceneration data, actual mean and  DISPLACEMENT_LIMIT
+	 * @param acc
+	 * @param mean
+	 */
+	private void resoleveDisplacements(double acc, double mean) {
 		if(!displacements.isEmpty()){
 			if(displacements.size() > 500){
 				displacements.clear();
 			}
 		}
 		
-		if(acc > mean + 1){
+		if(acc > mean + DISPLACEMENT_LIMIT){
 			if(!displacementFound){
 				displacementFound = true;
 			}
@@ -123,6 +154,10 @@ public class SensorUtils {
 
 	}
 	
+	/**
+	 * Method returns max displacement found above limit
+	 * @return
+	 */
 	public Displacement getMaxDisplacement(){		
 		
 		if(!cacheDisplacements.isEmpty()){
@@ -151,6 +186,10 @@ public class SensorUtils {
 		return null;
 	}
 
+	/**
+	 * Method returns all displacements found above limit
+	 * @return
+	 */
 	public double getDisplacement() {
 		if(displacements.isEmpty()){
 			return 0;
@@ -158,26 +197,35 @@ public class SensorUtils {
 		return displacements.get(displacements.size()-1);
 	}	
 	
+	/**
+	 * Method devides actual time on four sections
+	 * @return
+	 */
 	private byte getTimer() {
-		long currentTime = System.currentTimeMillis() % timeline;
+		long currentTime = System.currentTimeMillis() % TIMELINE;
 		byte timer = 1;
 
 		if (currentTime > 0) {
 			timer = 1;
 		}
-		if (currentTime > timeline / 4) {
+		if (currentTime > TIMELINE / 4) {
 			timer = 2;
 		}
-		if (currentTime > timeline / 2) {
+		if (currentTime > TIMELINE / 2) {
 			timer = 3;
 		}
-		if (currentTime > timeline / 4 * 3) {
+		if (currentTime > TIMELINE / 4 * 3) {
 			timer = 4;
 		}
 
 		return timer;
 	}
 
+	/**
+	 * Method reset computings using timer
+	 * @param timer
+	 * @param oldTimer
+	 */
 	private void resetMeans(byte timer, byte oldTimer) {
 		if (timer != oldTimer) {
 			if (timer == 2 && oldTimer == 1) {

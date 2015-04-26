@@ -6,16 +6,16 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.widget.TextView;
 
+/**
+ * Custom implementation of {@link android.opengl.GLSurfaceView}
+ * @author Tomáš Pochobradský
+ *
+ */
 @SuppressLint("ClickableViewAccessibility")
 public class MyGLSurfaceView extends GLSurfaceView {
 
 	private final MyGLRenderer mRenderer;
-	private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
-	private float mPreviousX;
-	private float mPreviousY;
-	private TextView rightTextView;
 	private MySensorEventListener sensorEventListener;
 
 	public MyGLSurfaceView(Context context) {
@@ -31,7 +31,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		init();
 	}
 
-	public void init() {
+	private void init() {
 		// Create an OpenGL ES 2.0 context.
 		setEGLContextClientVersion(2);
 		super.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
@@ -43,37 +43,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 	}
 
 	@Override
-	public boolean onTouchEvent(MotionEvent e) {
-		// MotionEvent reports input details from the touch screen
-		// and other input controls. In this case, you are only
-		// interested in events where the touch position changed.
-
-		float x = e.getX();
-		float y = e.getY();
-
-		switch (e.getAction()) {
-		case MotionEvent.ACTION_MOVE:
-
-			float dx = x - mPreviousX;
-			float dy = y - mPreviousY;
-
-			// reverse direction of rotation above the mid-line
-			if (y > getHeight() / 2) {
-				dx = dx * -1;
-			}
-
-			// reverse direction of rotation to left of the mid-line
-			if (x < getWidth() / 2) {
-				dy = dy * -1;
-			}
-
-			mRenderer.setAngle(mRenderer.getAngle()
-					+ ((dx + dy) * TOUCH_SCALE_FACTOR)); // = 180.0f / 320
-			requestRender();
-		}
-
-		mPreviousX = x;
-		mPreviousY = y;
+	public boolean onTouchEvent(MotionEvent e) {	
 		return true;
 	}
 	
@@ -87,18 +57,12 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		mRenderer.setTrianglePosition(f);
 	}
 	
-	public void setSquareScale(double scale){
-		mRenderer.setSquareScale(scale);
-	}
-
-
-	public void setTextView(TextView glSurfaceTextView) {
-		this.rightTextView = glSurfaceTextView;
-		
-	}
-	
-	public TextView getTextView(){
-		return rightTextView;
+	/**
+	 * {@link cz.pochoto.roadchecker.opengl.MyGLRenderer#setXYSquareScale(double)}
+	 * @param scale
+	 */
+	public void setXYSquareScale(double scale){
+		mRenderer.setXYSquareScale(scale);
 	}
 
 	public void setSensorEventListener(
@@ -107,17 +71,28 @@ public class MyGLSurfaceView extends GLSurfaceView {
 		this.sensorEventListener.setSurfaceView(this);
 		
 	}
-
+	
+	/**
+	 * {@link  android.opengl.GLSurfaceView#requestRender()}	
+	 */
 	public void render() {
 		requestRender();		
 	}
 
-	public void setMaxSquareScale(double scale) {
-		this.mRenderer.setMaxSquareScale(scale);		
+	/**
+	 * {@link cz.pochoto.roadchecker.opengl.MyGLRenderer#setDisplacementSquareScale(double)}
+	 * @param scale
+	 */
+	public void setDisplacementSquareScale(double scale) {
+		this.mRenderer.setDisplacementSquareScale(scale);		
 	}
 
-	public void setAvgZSquareScale(double averageZ) {
-		this.mRenderer.setAvgZSquareScale(averageZ);
+	/**
+	 * {@link cz.pochoto.roadchecker.opengl.MyGLRenderer#setAvgZSquareScale(double)}
+	 * @param scale
+	 */
+	public void setAvgZSquareScale(double scale) {
+		this.mRenderer.setAvgZSquareScale(scale);
 		
 	}
 

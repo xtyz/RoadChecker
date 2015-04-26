@@ -49,13 +49,19 @@ public class MapHandler extends AbstractHandler{
 	    }
 	}
 
-	
+	/**
+	 * Adds displacement to the cache for future map drawing
+	 * @param displacement
+	 */
 	public void addMatker(Displacement displacement){
 		System.out.println("added " + displacement.getValue());
 		displacements.add(displacement);
 		showMarkers();
 	}
 	
+	/**
+	 * Resolved and validate displacements in cache and if its valid, displacemens are drawed as markers to the map
+	 */
 	public void showMarkers(){		
 		if(mMap != null){
 			if(!displacements.isEmpty()){				

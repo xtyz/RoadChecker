@@ -9,10 +9,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.opengl.Matrix;
-import android.widget.TextView;
 
+/**
+ * Implementation od MySensorEventListener used for processing accelerometer and magnetometer data
+ * @author Tomáš Pochobradský
+ *
+ */
 public class MySensorEventListenerImpl implements MySensorEventListener {
-	private TextView accelerometerLabel, gyroscopeLabel;
 	private MyGLSurfaceView glSurfaceView;
 	private SensorUtils xySensorUtils = new SensorUtils();
 	private SensorUtils zSensorUtils = new SensorUtils();
@@ -94,9 +97,9 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 				
 			if (glSurfaceView != null) {
 				glSurfaceView.setTrianglePosition(new float[] { result[0], result[1], result[2]});
-				glSurfaceView.setSquareScale(xyMean);
+				glSurfaceView.setXYSquareScale(xyMean);
 				glSurfaceView.setAvgZSquareScale(zMean);
-				if(lastMaxDisplacement!=0)glSurfaceView.setMaxSquareScale(lastMaxDisplacement);
+				if(lastMaxDisplacement!=0)glSurfaceView.setDisplacementSquareScale(lastMaxDisplacement);
 				glSurfaceView.render();
 			}
 			
@@ -114,7 +117,8 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 			showResults(currentGK);			
 		}
 	}
-
+	
+	@Override
 	public void calibration(){				
 		stableR = currentR.clone();
 		stableG = currentG.clone();
@@ -138,6 +142,11 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 		}		
 	}
 
+	/**
+	 * Helper method for counting vector lenght
+	 * @param f
+	 * @return
+	 */
 	private double getVectorLenght(float[] f) {
 		if (f.length == 3 || f.length == 4) {
 			return Math.sqrt(f[0] * f[0] + f[1] * f[1] + f[2] * f[2]);
@@ -164,6 +173,10 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 		}
 	}
 	
+	/**
+	 * Provide result of sensor data processing to available resources
+	 * @param result
+	 */
 	private void showResults(float[] result){
 		String accLabel = "Akcelerometr:"+endl+"C: " + currentGValue + endl+"x: "
 				+ currentG[0] + endl+"y: " + currentG[1] + endl+"z: "
@@ -189,22 +202,18 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 				+"Low-Pass: "+LowPassFilter.ALPHA + endl;
 		
 		
-		if (accelerometerLabel != null) {
-			accelerometerLabel.setText(accLabel);
+		if (MainActivity.accelerometerLabel != null) {
+			MainActivity.accelerometerLabel.setText(accLabel);
 		}
 
-		if (glSurfaceView != null && glSurfaceView.getTextView() != null) {
-			glSurfaceView.getTextView().setText(accLabel);
+		if (MainActivity.glSurfaceTextView != null) {
+			MainActivity.glSurfaceTextView.setText(accLabel);
 		}
 		
-		if(gyroscopeLabel != null){
-			gyroscopeLabel.setText(gyrLabel);
+		if(MainActivity.gyroscopeLabel != null){
+			MainActivity.gyroscopeLabel.setText(gyrLabel);
 		}
 		
-	}
-	
-	public void calibrate(){
-		calibration();
 	}
 	
 	@Override
@@ -224,22 +233,6 @@ public class MySensorEventListenerImpl implements MySensorEventListener {
 	public boolean calibrationControl() {
 		calibrationControl = !calibrationControl;
 		return calibrationControl;
-	}
-		
-	public TextView getAccelerometerLabel() {
-		return accelerometerLabel;
-	}
-
-	public void setAccelerometerLabel(TextView accelerometerLabel) {
-		this.accelerometerLabel = accelerometerLabel;
-	}
-
-	public TextView getGyroscopeLabel() {
-		return gyroscopeLabel;
-	}
-
-	public void setGyroscopeLabel(TextView gyroscopeLabel) {
-		this.gyroscopeLabel = gyroscopeLabel;
 	}
 
 	@Override

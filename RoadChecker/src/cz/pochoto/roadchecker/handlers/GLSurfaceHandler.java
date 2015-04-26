@@ -1,6 +1,5 @@
 package cz.pochoto.roadchecker.handlers;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +16,8 @@ public class GLSurfaceHandler extends AbstractHandler{
 	private MyGLSurfaceView mGLView;
 	
 	private static View rootView;
+	
+	public static TextView glSurfaceTextView;
 
 	@Override
 	public View getRootView(LayoutInflater inflater, ViewGroup container) {
@@ -29,10 +30,7 @@ public class GLSurfaceHandler extends AbstractHandler{
 	@Override
 	public void init() {
 		if(mGLView == null){
-			mGLView = (MyGLSurfaceView)rootView.findViewById(R.id.gl_surface_view);
-			TextView glSurfaceTextView = (TextView)rootView.findViewById(R.id.gl_surface_text);
-			glSurfaceTextView.setTextColor(Color.WHITE);			
-			mGLView.setTextView(glSurfaceTextView);
+			mGLView = (MyGLSurfaceView)rootView.findViewById(R.id.gl_surface_view);			
 		}
 		
 		mGLView.setSensorEventListener(mSensorEventListener);		
@@ -56,9 +54,5 @@ public class GLSurfaceHandler extends AbstractHandler{
 			MySensorEventListener mSensorEventListener) {
 		this.mSensorEventListener = mSensorEventListener;
 		
-	}
-	
-	
-
-	
+	}	
 }

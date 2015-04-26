@@ -64,7 +64,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 	
 	public static RecordUtils recordUtils;
 
-	public static TextView accelerometerLabel, gyroscopeLabel;
+	public static TextView accelerometerLabel, gyroscopeLabel, glSurfaceTextView;
 	public static Button calibrateM, calibrateG;
 	public static SeekBar barM, barG;
 	public static ActionBar actionBar;
@@ -137,6 +137,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		actionBar.getTabAt(1).select();
 	}
 	
+	/**
+	 * Sensor check and registration
+	 */
 	public static void registerSensorListeners() {
 		if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
 						
@@ -265,15 +268,23 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 	}
 
+	/**
+	 * Method to give signal to sensorListener for record data
+	 * @param view button
+	 */
 	public void rec(View view){
 		if(mSensorEventListener != null){
 			mSensorEventListener.record();
 		}	
 	}
 	
+	/**
+	 * Method to give signal to sensorListener for calibration
+	 * @param view button
+	 */
 	public void calibrate(View view){
 		if(mSensorEventListener != null){
-			mSensorEventListener.calibrate();
+			mSensorEventListener.calibration();
 			Toast.makeText(getApplicationContext(), "Calibrated", Toast.LENGTH_SHORT).show();
 		}		
 	}
@@ -318,9 +329,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 					barM.setProgress(barG.getProgress());
 				}		
 				barM.setOnSeekBarChangeListener(new MySeekBarListener("M"));
-			}			
-			mSensorEventListener.setAccelerometerLabel(accelerometerLabel);
-			mSensorEventListener.setGyroscopeLabel(gyroscopeLabel);			
+			}					
 			
 			return rootView;
 		}
@@ -401,6 +410,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 			View rootView = glSurfaceHandler.getRootView(inflater, container);
+			
+			glSurfaceTextView = (TextView)rootView.findViewById(R.id.gl_surface_text);
+			glSurfaceTextView.setTextColor(Color.WHITE);
+			
 			if(barG == null){
 				barG = (SeekBar)rootView.findViewById(R.id.seekAlpha);
 				if(barM == null){
@@ -431,6 +444,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 		}
 	}
 
+	/**
+	 * Method save current location and show actual speed in the bar
+	 * @param loc
+	 */
 	public static void setLocation(Location loc) {
 		location = loc;
 		actionBar.setSubtitle(String.valueOf(location.getSpeed()) + " km/h");		

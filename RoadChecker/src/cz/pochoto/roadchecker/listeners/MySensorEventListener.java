@@ -2,22 +2,29 @@ package cz.pochoto.roadchecker.listeners;
 
 import cz.pochoto.roadchecker.opengl.MyGLSurfaceView;
 import android.hardware.SensorEventListener;
-import android.widget.TextView;
 
 public interface MySensorEventListener extends SensorEventListener {
-	public TextView getAccelerometerLabel();
-
-	public void setAccelerometerLabel(TextView accelerometerLabel);
-
-	public TextView getGyroscopeLabel();
-
-	public void setGyroscopeLabel(TextView gyroscopeLabel);
-
+	
+	/**
+	 * Sets MyGlSurfaceView to the listener for drawing results
+	 * @param myGLSurfaceView
+	 */
 	public void setSurfaceView(MyGLSurfaceView myGLSurfaceView);
 
-	public void calibrate();
+	/**
+	 * Calibration af sensor values
+	 */
+	public void calibration();
 	
+	/**
+	 * Start or stop recording
+	 * @return
+	 */
 	public boolean record();
 
+	/**
+	 * Enabled or disabled calibration control
+	 * @return
+	 */
 	public boolean calibrationControl();
 }

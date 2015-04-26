@@ -24,10 +24,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	private static final String TAG = "MyGLRenderer";
 	private Triangle mTriangle;
 	private Square mSquare;
+	
 	private static float SLOW_DOWN = 0.0001f;
 	private static float LIMIT = 0.1f;
 
-	// mMVPMatrix is an abbreviation for "Model View Projection Matrix"
 	private final float[] mMVPMatrix = new float[16];
 	private final float[] mProjectionMatrix = new float[16];
 	private final float[] mViewMatrix = new float[16];
@@ -70,7 +70,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 		Matrix.setIdentityM(mScaleMatrix, 0);
 		
-		// Draw average square		
+		// Draw average XY square		
 		Matrix.scaleM(mScaleMatrix, 0, scale, scale, scale);
 		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
 		mSquare.setColorBlue();
@@ -79,7 +79,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		
 		Matrix.setIdentityM(mScaleMatrix, 0);
 		
-		// Draw maxZ square		
+		// Draw displacement Z square		
 		Matrix.scaleM(mScaleMatrix, 0, 0.2f, maxScale, 0f);
 		Matrix.translateM(mScaleMatrix, 0, -5f, 0, 0);
 		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
@@ -89,7 +89,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		
 		Matrix.setIdentityM(mScaleMatrix, 0);
 		
-		// Draw currentZ square		
+		// Draw current Z square		
 		Matrix.scaleM(mScaleMatrix, 0, 0.2f, f[2], 0f);
 		Matrix.translateM(mScaleMatrix, 0, -5f, 0, 0);
 		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
@@ -99,7 +99,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 				
 		Matrix.setIdentityM(mScaleMatrix, 0);
 		
-		// Draw averageZ square		
+		// Draw average Z square		
 		Matrix.scaleM(mScaleMatrix, 0, 0.2f, averageZ, 0f);
 		Matrix.translateM(mScaleMatrix, 0, -5f, 0, 0);
 		Matrix.multiplyMM(scratchSquare, 0, mMVPMatrix, 0, mScaleMatrix, 0);
@@ -107,27 +107,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		mSquare.draw(scratchSquare);		
 		
 		
-		// Create a rotation for the triangle
+		// Draw triangle XY
 		Matrix.translateM(mModelMatrix, 0, f[0] / 10f, -f[1] / 10f, f[2] / 10f);
-		mTriangle.setTriangleCoords(f);		
-		// Combine the rotation matrix with the projection and camera view
-		// Note that the mMVPMatrix factor *must be first* in order
-		// for the matrix multiplication product to be correct.		
+		mTriangle.setTriangleCoords(f);
 		Matrix.multiplyMM(scratchTriangle, 0, mMVPMatrix, 0, mModelMatrix, 0);
-
 		mTriangle.draw(scratchTriangle);
 	}
 
 	@Override
 	public void onSurfaceChanged(GL10 unused, int width, int height) {
-		// Adjust the viewport based on geometry changes,
-		// such as screen rotation
+		
 		GLES20.glViewport(0, 0, width, height);
-
 		float ratio = (float) width / height;
-
-		// this projection matrix is applied to object coordinates
-		// in the onDrawFrame() method
 		Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 2, 7);
 
 	}
@@ -148,11 +139,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	 */
 	public static int loadShader(int type, String shaderCode) {
 
-		// create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-		// or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
 		int shader = GLES20.glCreateShader(type);
-
-		// add the source code to the shader and compile it
 		GLES20.glShaderSource(shader, shaderCode);
 		GLES20.glCompileShader(shader);
 
@@ -197,6 +184,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		mAngle = angle;
 	}
 
+	/**
+	 * Sets position for triangle
+	 * @param f
+	 */
 	public void setTrianglePosition(float[] f) {
 		if (f[0] == 0 && f[1] == 0) {
 			if (this.f[0] > LIMIT && this.f[0] < -LIMIT && this.f[1] > LIMIT && this.f[1] < -LIMIT) {
@@ -218,15 +209,27 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 		this.f = f;
 	}
 	
-	public void setSquareScale(double scale){
+	/**
+	 * Sets average value for XY square
+	 * @param scale
+	 */
+	public void setXYSquareScale(double scale){
 		this.scale = (float)scale;
 	}
 
-	public void setMaxSquareScale(double scale) {
+	/**
+	 * Sets displacement value for Z square
+	 * @param scale
+	 */
+	public void setDisplacementSquareScale(double scale) {
 		this.maxScale = (float)scale;
 		
 	}
 
+	/**
+	 * Sets average value for Z square
+	 * @param averageZ
+	 */
 	public void setAvgZSquareScale(double averageZ) {
 		this.averageZ = (float)averageZ;		
 	}

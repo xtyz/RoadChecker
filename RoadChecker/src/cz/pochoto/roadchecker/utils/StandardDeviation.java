@@ -1,5 +1,10 @@
 package cz.pochoto.roadchecker.utils;
 
+/**
+ * Standard Deviation Counting
+ * @author Tomáš Pochobradský
+ *
+ */
 public class StandardDeviation extends AbstractCounter{
 	
 	@Override
