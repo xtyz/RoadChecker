@@ -25,15 +25,28 @@ public class SensorUtils {
 	private double finalDeviation = 0;
 	private double lastMaxDisplacement = 0;
 	private byte timer = 1;
+	private float timeLimit = 1000l;
 	private boolean displacementFound = false;
 	
 	private List<Double> displacements = new ArrayList<Double>();
 	private List<Displacement> cacheDisplacements = new ArrayList<Displacement>();	
-	
+	/**
+	 * Default timeline for mean counting
+	 */
 	private final static int TIMELINE = 10000;
+	/**
+	 * Limit for recognising displacements
+	 */
 	private final static int DISPLACEMENT_LIMIT = 1;
-	private final static float TIME_LIMIT = 1000l;
-	
+	/**
+	 * Distance toleration for pothole - all potholes on 10 meters on the road is recognised as one
+	 */
+	private final static int DISTANCE_TOLERATION = 10;
+	/**
+	 * Default time limit for recognising potholes - 1s
+	 */
+	private final static float DEFAULT_TIME_LIMIT = 1000l;
+		
 	double currentAcc;
 
 	public SensorUtils() {
@@ -166,7 +179,15 @@ public class SensorUtils {
 			
 			System.out.println(timeDif / 1000l + " s");
 			//pokud uplynul urcity cas od posledni vychylky vypocitat max a vratit vysledek
-			if(timeDif < TIME_LIMIT){
+			
+			if(MainActivity.location != null && MainActivity.location.getSpeed() > 0){
+				float speed = MainActivity.location.getSpeed() / 3.6f;
+				timeLimit = DISTANCE_TOLERATION / speed;
+				
+			}else{
+				timeLimit = DEFAULT_TIME_LIMIT;
+			}
+			if(timeDif < timeLimit){
 				return null;
 			}	
 			try{
