@@ -259,8 +259,6 @@ public class MainActivity extends Activity implements ActionBar.TabListener,
 
 	}
 
-
-
 	protected void createLocationRequest() {
 		mLocationRequest = new LocationRequest();
 		mLocationRequest.setInterval(10000);

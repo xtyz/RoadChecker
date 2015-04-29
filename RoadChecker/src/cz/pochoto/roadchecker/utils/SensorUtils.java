@@ -182,8 +182,7 @@ public class SensorUtils {
 			
 			if(MainActivity.location != null && MainActivity.location.getSpeed() > 0){
 				float speed = MainActivity.location.getSpeed() / 3.6f;
-				timeLimit = DISTANCE_TOLERATION / speed;
-				
+				timeLimit = DISTANCE_TOLERATION / speed;				
 			}else{
 				timeLimit = DEFAULT_TIME_LIMIT;
 			}
